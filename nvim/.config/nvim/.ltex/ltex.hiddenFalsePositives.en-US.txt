@@ -1,0 +1,1 @@
+{"rule":"BEEN_PART_AGREEMENT","sentence":"^\\QThis is test markdown file I am going to be making a lot of mistake in the document Lets see what the editor is going to think\\E$"}
