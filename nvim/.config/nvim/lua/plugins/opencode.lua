@@ -5,6 +5,7 @@ return{
     -- Required for `snacks` provider.
     ---@module 'snacks' <- Loads `snacks.nvim` types for configuration intellisense.
     { "folke/snacks.nvim", opts = { input = {}, picker = {}, terminal = {} } },
+    "folke/which-key.nvim",
   },
   config = function()
     ---@type opencode.Opts
@@ -22,6 +23,16 @@ return{
     vim.keymap.set({ "n", "t" }, "<leader>ot", function() require("opencode").toggle() end,                          { desc = "Toggle opencode" })
     vim.keymap.set("n",        "<S-C-u>", function() require("opencode").command("session.half.page.up") end,   { desc = "opencode half page up" })
     vim.keymap.set("n",        "<S-C-d>", function() require("opencode").command("session.half.page.down") end, { desc = "opencode half page down" })
+    
+    -- Register with which-key
+    pcall(function()
+      local wk = require("which-key")
+      wk.add({
+        { "<leader>o", group = "OpenCode" },
+        { "<leader>ot", desc = "Toggle opencode" },
+      })
+    end)
+    
     -- You may want these if you stick with the opinionated "<C-a>" and "<C-x>" above — otherwise consider "<leader>o".
     vim.keymap.set('n', '+', '<C-a>', { desc = 'Increment', noremap = true })
     vim.keymap.set('n', '-', '<C-x>', { desc = 'Decrement', noremap = true })
