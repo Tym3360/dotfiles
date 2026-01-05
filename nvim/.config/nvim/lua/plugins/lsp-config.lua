@@ -21,7 +21,8 @@ return {
         ensure_installed = {
           "lua_ls",
           "pylsp",
-          "texlab"-- Changed from pylsp, but you can use either
+          "texlab",-- Changed from pylsp, but you can use either
+          "arduino_language_server"
         },
         automatic_installation = true,
       })
@@ -53,62 +54,84 @@ return {
         },
       })
       -- Pyright configuration
-vim.lsp.config.pylsp = {
-  cmd = { 'pylsp' },
-  filetypes = { 'python' },
-  root_markers = { 'pyproject.toml', 'setup.py', '.git' },
-  
-  before_init = function(params, config)
-    if vim.g.poetv_venv then
-      config.settings = vim.deepcopy(config.settings or {})
-      config.settings.pylsp = config.settings.pylsp or {}
-      config.settings.pylsp.plugins = config.settings.pylsp.plugins or {}
-      config.settings.pylsp.plugins.jedi = config.settings.pylsp.plugins.jedi or {}
-      config.settings.pylsp.plugins.jedi.environment = vim.g.poetv_venv .. '/bin/python'
-    end
-  end,
-  
-  settings = {
-    pylsp = {
-      plugins = {
-        pycodestyle = { enabled = true },
-        pyflakes = { enabled = true },
-        pylint = { enabled = false },
-        mccabe = { enabled = false },
+      vim.lsp.config.pylsp = {
+        cmd = { 'pylsp' },
+        filetypes = { 'python' },
+        root_markers = { 'pyproject.toml', 'setup.py', '.git' },
+
+        before_init = function(params, config)
+          if vim.g.poetv_venv then
+            config.settings = vim.deepcopy(config.settings or {})
+            config.settings.pylsp = config.settings.pylsp or {}
+            config.settings.pylsp.plugins = config.settings.pylsp.plugins or {}
+            config.settings.pylsp.plugins.jedi = config.settings.pylsp.plugins.jedi or {}
+            config.settings.pylsp.plugins.jedi.environment = vim.g.poetv_venv .. '/bin/python'
+          end
+        end,
+
+        settings = {
+          pylsp = {
+            plugins = {
+              pycodestyle = { enabled = true },
+              pyflakes = { enabled = true },
+              pylint = { enabled = false },
+              mccabe = { enabled = false },
+            }
+          }
+        }
       }
-    }
-  }
-}
 
-vim.lsp.enable('pylsp')
-     -- Texlab LSP setup using new vim.lsp.config API (Neovim 0.11+)
-vim.lsp.config.texlab = {
-  cmd = { "texlab" },
-  filetypes = { "tex", "plaintex", "bib" },
-  root_markers = { ".latexmkrc", ".git" },
-  capabilities = require('cmp_nvim_lsp').default_capabilities(),
-  settings = {
-    texlab = {
-      build = {
-        executable = "latexmk",
-        args = { "-pdf", "-interaction=nonstopmode", "-synctex=1", "%f" },
-        onSave = true,
-      },
-      forwardSearch = {
-        executable = "skim", -- or "zathura" on Linux, "sumatrapdf" on Windows
-        args = { "--synctex-forward", "%l:1:%f", "%p" },
-      },
-    },
-  },
-}
+      vim.lsp.enable('pylsp')
+      -- Texlab LSP setup using new vim.lsp.config API (Neovim 0.11+)
+      vim.lsp.config.texlab = {
+        cmd = { "texlab" },
+        filetypes = { "tex", "plaintex", "bib" },
+        root_markers = { ".latexmkrc", ".git" },
+        capabilities = require('cmp_nvim_lsp').default_capabilities(),
+        settings = {
+          texlab = {
+            build = {
+              executable = "latexmk",
+              args = { "-pdf", "-interaction=nonstopmode", "-synctex=1", "%f" },
+              onSave = true,
+            },
+            forwardSearch = {
+              executable = "skim", -- or "zathura" on Linux, "sumatrapdf" on Windows
+              args = { "--synctex-forward", "%l:1:%f", "%p" },
+            },
+          },
+        },
+      }
 
--- Enable texlab for LaTeX files
-vim.api.nvim_create_autocmd("FileType", {
-  pattern = { "tex", "plaintex", "bib" },
-  callback = function()
-    vim.lsp.enable("texlab")
-  end,
-})
+      -- Arduino Language Server configuration
+      vim.lsp.config.arduino_language_server = {
+        cmd = {
+          "arduino-language-server",
+          "-cli-config", vim.fn.expand("~/Library/Arduino15/arduino-cli.yaml"),
+          "-clangd", "clangd",
+          "-cli", "arduino-cli",
+          "-fqbn", "arduino:avr:uno" -- Default board, can be overridden per project
+        },
+        filetypes = { "arduino" },
+        root_markers = { "*.ino" },
+        capabilities = require('cmp_nvim_lsp').default_capabilities(),
+      }
+
+      -- Enable Arduino LSP for .ino files
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "arduino",
+        callback = function()
+          vim.lsp.enable("arduino_language_server")
+        end,
+      })
+
+      -- Enable texlab for LaTeX files
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = { "tex", "plaintex", "bib" },
+        callback = function()
+          vim.lsp.enable("texlab")
+        end,
+      })
       -- Enable other LSP servers using new Nvim 0.11+ way
       vim.lsp.enable('lua_ls')
       vim.lsp.enable('pylsp')
@@ -118,12 +141,12 @@ vim.api.nvim_create_autocmd("FileType", {
       vim.keymap.set('n', 'gd', vim.lsp.buf.definition, { desc = 'LSP: Go to Definition' })
       vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, { desc = 'LSP: Go to Declaration' })
       vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, { desc = 'LSP: Go to Implementation' })
-       vim.keymap.set('n', 'gR', vim.lsp.buf.references, { desc = 'LSP: Show References' })
+      vim.keymap.set('n', 'gR', vim.lsp.buf.references, { desc = 'LSP: Show References' })
       vim.keymap.set('n', '<space>rn', vim.lsp.buf.rename, { desc = 'LSP: Rename' })
       vim.keymap.set({ 'n', 'v' }, '<space>ca', vim.lsp.buf.code_action, { desc = 'LSP: Code Action' })
-       vim.keymap.set('n', '<space>fm', function()
-         vim.lsp.buf.format({ async = true })
-       end, { desc = 'LSP: Format' })
+      vim.keymap.set('n', '<space>fm', function()
+        vim.lsp.buf.format({ async = true })
+      end, { desc = 'LSP: Format' })
       vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, { desc = 'LSP: Signature Help' })
       vim.keymap.set('n', '<space>D', vim.lsp.buf.type_definition, { desc = 'LSP: Type Definition' })
       -- Optional: Configure diagnostics display

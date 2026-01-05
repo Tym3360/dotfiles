@@ -3,10 +3,12 @@ return {
   dependencies = {
     "rcarriga/nvim-dap-ui",
     "nvim-neotest/nvim-nio",
+    "Cliffback/netcoredbg-macOS-arm64.nvim",
   },
   config = function ()
     local dap, dapui = require("dap"), require("dapui")
     require("dapui").setup()
+    require('netcoredbg-macOS-arm64').setup(require('dap'))
     dap.listeners.before.attach.dapui_config = function()
       dapui.open()
     end
