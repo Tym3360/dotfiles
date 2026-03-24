@@ -52,6 +52,10 @@ return {
         icon = "✔ ",
       },
       custom = {
+        -- Fallbacks when markdown parser does not expose task_list_marker_* nodes.
+        unchecked = { raw = "[ ]", rendered = "☐ ", highlight = "RenderMarkdownUnchecked" },
+        checked = { raw = "[x]", rendered = "✔ ", highlight = "RenderMarkdownChecked" },
+        checked_upper = { raw = "[X]", rendered = "✔ ", highlight = "RenderMarkdownChecked" },
         in_progress = { raw = "[>]", rendered = "➜ ", highlight = "RenderMarkdownTodo" },
         cancelled = { raw = "[~]", rendered = "~ ", highlight = "RenderMarkdownError" },
         important = { raw = "[!]", rendered = "! ", highlight = "RenderMarkdownWarn" },
