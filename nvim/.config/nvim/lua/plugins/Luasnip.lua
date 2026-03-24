@@ -16,6 +16,8 @@ return {
     local c = ls.choice_node
     local d = ls.dynamic_node
     local sn = ls.snippet_node
+    vim.keymap.set({"i", "s"}, "<C-l>", function() luasnip.jump(1) end)
+    vim.keymap.set({"i", "s"}, "<C-h>", function() luasnip.jump(-1) end)
 
     -- LuaSnip configuration
     ls.config.set_config({
@@ -34,6 +36,9 @@ return {
     -- Load friendly-snippets
     require("luasnip.loaders.from_vscode").lazy_load()
 
+    -- Load custom snippets from ~/.config/nvim/LuaSnip/
+    require("luasnip.loaders.from_lua").load({paths = "~/.config/nvim/LuaSnip"})
+
     -- Custom LaTeX snippets
     ls.add_snippets("tex", {
       -- Begin/End environment
@@ -42,53 +47,53 @@ return {
         t({"", "\t"}), i(0),
         t({"", "\\end{"}), f(function(args) return args[1][1] end, {1}), t("}"),
       }),
-      
+
       -- Inline math
       s("mm", {
         t("$"), i(1), t("$"), i(0)
       }),
-      
+
       -- Display math
       s("dm", {
         t({"\\[", "\t"}), i(1),
         t({"", "\\]"}), i(0)
       }),
-      
+
       -- Equation environment
       s("eq", {
         t({"\\begin{equation}", "\t"}), i(1),
         t({"", "\\end{equation}"}), i(0)
       }),
-      
+
       -- Align environment
       s("ali", {
         t({"\\begin{align}", "\t"}), i(1),
         t({"", "\\end{align}"}), i(0)
       }),
-      
+
       -- Fraction
       s("frac", {
         t("\\frac{"), i(1), t("}{"), i(2), t("}"), i(0)
       }),
-      
+
       -- Section
       s("sec", {
         t("\\section{"), i(1), t("}"),
         t({"", ""}), i(0)
       }),
-      
+
       -- Subsection
       s("ssec", {
         t("\\subsection{"), i(1), t("}"),
         t({"", ""}), i(0)
       }),
-      
+
       -- Subsubsection
       s("sssec", {
         t("\\subsubsection{"), i(1), t("}"),
         t({"", ""}), i(0)
       }),
-      
+
       -- Figure environment
       s("fig", {
         t({"\\begin{figure}[htbp]", "\t\\centering"}),
@@ -97,7 +102,7 @@ return {
         t({"", "\t\\label{fig:"}), i(4, "label"), t("}"),
         t({"", "\\end{figure}"}), i(0)
       }),
-      
+
       -- Table environment
       s("tab", {
         t({"\\begin{table}[htbp]", "\t\\centering"}),
@@ -112,38 +117,38 @@ return {
         t({"", "\t\\end{tabular}"}),
         t({"", "\\end{table}"}),
       }),
-      
+
       -- Itemize
       s("item", {
         t({"\\begin{itemize}", "\t\\item "}), i(1),
         t({"", "\\end{itemize}"}), i(0)
       }),
-      
+
       -- Enumerate
       s("enum", {
         t({"\\begin{enumerate}", "\t\\item "}), i(1),
         t({"", "\\end{enumerate}"}), i(0)
       }),
-      
+
       -- Description
       s("desc", {
         t({"\\begin{description}", "\t\\item["}), i(1, "term"), t("] "), i(2),
         t({"", "\\end{description}"}), i(0)
       }),
-      
+
       -- Text formatting
       s("bf", {
         t("\\textbf{"), i(1), t("}"), i(0)
       }),
-      
+
       s("it", {
         t("\\textit{"), i(1), t("}"), i(0)
       }),
-      
+
       s("tt", {
         t("\\texttt{"), i(1), t("}"), i(0)
       }),
-      
+
       -- Greek letters (common ones)
       s("alpha", { t("\\alpha") }),
       s("beta", { t("\\beta") }),
@@ -155,56 +160,56 @@ return {
       s("mu", { t("\\mu") }),
       s("sigma", { t("\\sigma") }),
       s("omega", { t("\\omega") }),
-      
+
       -- Common math operators
       s("sum", {
         t("\\sum_{"), i(1, "i=1"), t("}^{"), i(2, "n"), t("} "), i(0)
       }),
-      
+
       s("int", {
         t("\\int_{"), i(1, "a"), t("}^{"), i(2, "b"), t("} "), i(3), t(" \\, d"), i(4, "x"), i(0)
       }),
-      
+
       s("lim", {
         t("\\lim_{"), i(1, "x \\to \\infty"), t("} "), i(0)
       }),
-      
+
       -- Matrices
       s("mat", {
         t({"\\begin{bmatrix}", "\t"}), i(1),
         t({"", "\\end{bmatrix}"}), i(0)
       }),
-      
+
       s("pmat", {
         t({"\\begin{pmatrix}", "\t"}), i(1),
         t({"", "\\end{pmatrix}"}), i(0)
       }),
-      
+
       -- Theorem-like environments
       s("thm", {
         t({"\\begin{theorem}", "\t"}), i(1),
         t({"", "\\end{theorem}"}), i(0)
       }),
-      
+
       s("lem", {
         t({"\\begin{lemma}", "\t"}), i(1),
         t({"", "\\end{lemma}"}), i(0)
       }),
-      
+
       s("proof", {
         t({"\\begin{proof}", "\t"}), i(1),
         t({"", "\\end{proof}"}), i(0)
       }),
-      
+
       -- Citation and reference
       s("cite", {
         t("\\cite{"), i(1), t("}"), i(0)
       }),
-      
+
       s("ref", {
         t("\\ref{"), i(1), t("}"), i(0)
       }),
-      
+
       s("eqref", {
         t("\\eqref{"), i(1), t("}"), i(0)
       }),

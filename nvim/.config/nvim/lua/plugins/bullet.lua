@@ -14,7 +14,7 @@ return {
     -- Renumber on insert/delete
     vim.g.bullets_renumber_on_change = 1
 
-    -- Custom key mappings
+    -- Custom key mappings (checkbox toggle removed - obsidian.nvim handles it)
     vim.g.bullets_custom_mappings = {
       {"imap", "<cr>", "<Plug>(bullets-newline)"},
       {"nmap", "o", "<Plug>(bullets-newline)"},
@@ -24,7 +24,6 @@ return {
       {"nmap", ">>", "<Plug>(bullets-demote)"},
       {"imap", "<C-d>", "<Plug>(bullets-promote)"},
       {"nmap", "<<", "<Plug>(bullets-promote)"},
-      {"nmap", "<leader>x", "<Plug>(bullets-toggle-checkbox)"},
     }
   end,
 }
