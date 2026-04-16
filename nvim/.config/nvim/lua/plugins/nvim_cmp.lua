@@ -29,7 +29,10 @@ cmp.setup({
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
     ['<C-Space>'] = cmp.mapping.complete(),
     ['<C-e>'] = cmp.mapping.abort(),
-    ['<CR>'] = cmp.mapping.confirm({ select = true }),
+    ['<CR>'] = cmp.mapping.confirm({
+      select = true,
+      behavior = cmp.ConfirmBehavior.Replace,
+    }),
     
     -- Tab: trigger completion or navigate/expand snippets
     ['<Tab>'] = cmp.mapping(function(fallback)
@@ -82,7 +85,7 @@ vim.api.nvim_create_autocmd("TextChangedI", {
   callback = function()
     local line = vim.api.nvim_get_current_line()
     local col = vim.api.nvim_win_get_cursor(0)[2]
-    local before_cursor = line:sub(1, col)
+    local before_cursor = line:sub(1, col + 1)
     
     -- Check if we're in the Obsidian vault
     local filepath = vim.fn.expand("%:p")
