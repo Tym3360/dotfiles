@@ -14,3 +14,6 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.keymap.set('n', '<F5>', ':w<CR>:!poetry run python %<CR>', { buffer = true, desc = "Run Python file with Poetry" })
   end
 })
+
+-- Prevent accidental terminal suspension (Ctrl-Z) while editing.
+vim.keymap.set({ 'n', 'i', 'v' }, '<C-z>', '<Nop>', { silent = true, desc = 'Disable suspend' })

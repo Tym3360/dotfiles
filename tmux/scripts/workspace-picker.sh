@@ -82,14 +82,24 @@ main() {
             create_obsidian_session "$OBSIDIAN_PATH"
             ;;
         "LaTeX")
+            # Select LaTeX source folder
+            latex_source=$(printf "Default ($LATEX_PATH)\nGitHub ($CODE_PATH)" | fzf --prompt="LaTeX Source > " --height=5 --reverse --border)
+            [ -z "$latex_source" ] && exit 0
+            
+            if [[ "$latex_source" == *"Default"* ]]; then
+                target_path="$LATEX_PATH"
+            else
+                target_path="$CODE_PATH"
+            fi
+            
             # Let user pick a specific LaTeX project
-            project=$(find "$LATEX_PATH" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | \
+            project=$(find "$target_path" -mindepth 1 -maxdepth 1 -type d 2>/dev/null | \
                       xargs -I {} basename {} | \
                       fzf --prompt="LaTeX Project > " --height=20 --reverse --border)
             
             if [ -n "$project" ]; then
                 session_name="latex-$(echo "$project" | tr ' ' '-' | tr '[:upper:]' '[:lower:]')"
-                create_latex_session "$session_name" "$LATEX_PATH/$project"
+                create_latex_session "$session_name" "$target_path/$project"
             fi
             ;;
         "Code")

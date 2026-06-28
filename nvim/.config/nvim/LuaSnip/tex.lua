@@ -10,6 +10,16 @@ local r = ls.restore_node
 local fmt = require("luasnip.extras.fmt").fmt
 local fmta = require("luasnip.extras.fmt").fmta
 local rep = require("luasnip.extras").rep
+local events = require("luasnip.util.events")
+
+local function trigger_path_cmp()
+  vim.defer_fn(function()
+    local ok, cmp = pcall(require, "cmp")
+    if ok then
+      cmp.complete()
+    end
+  end, 50)
+end
 
 -- Helper function for math context
 local tex = {}
@@ -117,6 +127,30 @@ local autosnippets = {
   ),
 }
 
+local function create_label(args)
+  local text = args[1][1] or ""
+  -- Replace accented characters
+  text = text:gsub("é", "e"):gsub("è", "e"):gsub("ê", "e"):gsub("ë", "e")
+  text = text:gsub("à", "a"):gsub("â", "a"):gsub("ä", "a")
+  text = text:gsub("î", "i"):gsub("ï", "i")
+  text = text:gsub("ô", "o"):gsub("ö", "o")
+  text = text:gsub("ù", "u"):gsub("û", "u"):gsub("ü", "u")
+  text = text:gsub("ç", "c")
+  text = text:gsub("É", "E"):gsub("È", "E"):gsub("Ê", "E"):gsub("Ë", "E")
+  text = text:gsub("À", "A"):gsub("Â", "A"):gsub("Ä", "A")
+  text = text:gsub("Î", "I"):gsub("Ï", "I")
+  text = text:gsub("Ô", "O"):gsub("Ö", "O")
+  text = text:gsub("Ù", "U"):gsub("Û", "U"):gsub("Ü", "U")
+  text = text:gsub("Ç", "C")
+  -- Convert to lowercase
+  text = text:lower()
+  -- Replace any non-alphanumeric character with underscore
+  text = text:gsub("[^%w]+", "_")
+  -- Remove leading/trailing underscores
+  text = text:gsub("^_", ""):gsub("_$", "")
+  return text
+end
+
 -- Regular snippets
 local snippets = {
   -- Document templates
@@ -150,10 +184,49 @@ local snippets = {
   i(0)
 })),
 
-  -- Sections
-  s("sec", fmta("\\section{<>}", {i(1)})),
-  s("ssec", fmta("\\subsection{<>}", {i(1)})),
-  s("sssec", fmta("\\subsubsection{<>}", {i(1)})),
+  -- Sections & Chapters
+  s("part", fmta(
+[[
+\part{<>}\label{prt:<>} % (fold)
+
+% part <> (end)
+]], {i(1), f(create_label, {1}), rep(1)})),
+  s("cha", fmta(
+[[
+\chapter{<>}\label{chap:<>} % (fold)
+
+% chapter <> (end)
+]], {i(1), f(create_label, {1}), rep(1)})),
+  s("sec", fmta(
+[[
+\section{<>}\label{sec:<>} % (fold)
+
+% section <> (end)
+]], {i(1), f(create_label, {1}), rep(1)})),
+  s("ssec", fmta(
+[[
+\subsection{<>}\label{sub:<>} % (fold)
+
+% subsection <> (end)
+]], {i(1), f(create_label, {1}), rep(1)})),
+  s("sssec", fmta(
+[[
+\subsubsection{<>}\label{ssub:<>} % (fold)
+
+% subsubsection <> (end)
+]], {i(1), f(create_label, {1}), rep(1)})),
+  s("par", fmta(
+[[
+\paragraph{<>}\label{par:<>} % (fold)
+
+% paragraph <> (end)
+]], {i(1), f(create_label, {1}), rep(1)})),
+  s("subp", fmta(
+[[
+\subparagraph{<>}\label{subp:<>} % (fold)
+
+% subparagraph <> (end)
+]], {i(1), f(create_label, {1}), rep(1)})),
 
   -- Environments
   s("beg",
@@ -226,9 +299,9 @@ local snippets = {
 ]], {
   i(1, "htbp"),
   i(2, "0.8"),
-  i(3, "path/to/image"),
+  i(3, "", { callbacks = { [-1] = { [events.enter] = trigger_path_cmp } } }),
   i(4, "Caption"),
-  i(5, "label")
+  f(create_label, {4})
 })),
 
   -- Tables
@@ -250,7 +323,7 @@ local snippets = {
   i(2, "c|c"),
   i(3),
   i(4, "Caption"),
-  i(5, "label")
+  f(create_label, {4})
 })),
 
   -- Matrix
@@ -298,6 +371,19 @@ local snippets = {
   s("ref", fmta("\\ref{<>}", {i(1)})),
   s("cite", fmta("\\cite{<>}", {i(1)})),
   s("lab", fmta("\\label{<>}", {i(1)})),
+  -- Alternate triggers to match friendly-snippets
+  s("sub", fmta(
+[[
+\subsection{<>}\label{sub:<>} % (fold)
+
+% subsection <> (end)
+]], {i(1), f(create_label, {1}), rep(1)})),
+  s("subs", fmta(
+[[
+\subsubsection{<>}\label{ssub:<>} % (fold)
+
+% subsubsection <> (end)
+]], {i(1), f(create_label, {1}), rep(1)})),
 }
 
 return snippets, autosnippets

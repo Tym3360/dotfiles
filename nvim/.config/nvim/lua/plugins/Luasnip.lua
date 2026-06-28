@@ -16,9 +16,6 @@ return {
     local c = ls.choice_node
     local d = ls.dynamic_node
     local sn = ls.snippet_node
-    vim.keymap.set({"i", "s"}, "<C-l>", function() luasnip.jump(1) end)
-    vim.keymap.set({"i", "s"}, "<C-h>", function() luasnip.jump(-1) end)
-
     -- LuaSnip configuration
     ls.config.set_config({
       history = true, -- keep around last snippet local to jump back
@@ -34,7 +31,16 @@ return {
     })
 
     -- Load friendly-snippets
-    require("luasnip.loaders.from_vscode").lazy_load()
+    require("luasnip.loaders.from_vscode").lazy_load({ exclude = { "latex", "tex" } })
+
+    local function trigger_path_cmp()
+      vim.defer_fn(function()
+        local ok, cmp = pcall(require, "cmp")
+        if ok then
+          cmp.complete()
+        end
+      end, 50)
+    end
 
     -- Load custom snippets from ~/.config/nvim/LuaSnip/
     require("luasnip.loaders.from_lua").load({paths = "~/.config/nvim/LuaSnip"})
@@ -77,27 +83,27 @@ return {
       }),
 
       -- Section
-      s("sec", {
+      s("sec2", {
         t("\\section{"), i(1), t("}"),
         t({"", ""}), i(0)
       }),
 
       -- Subsection
-      s("ssec", {
+      s("ssec2", {
         t("\\subsection{"), i(1), t("}"),
         t({"", ""}), i(0)
       }),
 
       -- Subsubsection
-      s("sssec", {
+      s("sssec2", {
         t("\\subsubsection{"), i(1), t("}"),
         t({"", ""}), i(0)
       }),
 
       -- Figure environment
-      s("fig", {
+      s("fig2", {
         t({"\\begin{figure}[htbp]", "\t\\centering"}),
-        t({"", "\t\\includegraphics[width="}), i(1, "0.8"), t("\\textwidth]{"), i(2, "image"), t("}"),
+        t({"", "\t\\includegraphics[width="}), i(1, "0.8"), t("\\textwidth]{"), i(2, "", { callbacks = { [-1] = { [require("luasnip.util.events").enter] = trigger_path_cmp } } }), t("}"),
         t({"", "\t\\caption{"}), i(3, "caption"), t("}"),
         t({"", "\t\\label{fig:"}), i(4, "label"), t("}"),
         t({"", "\\end{figure}"}), i(0)

@@ -88,12 +88,19 @@ return {
         filetypes = { "tex", "plaintex", "bib" },
         root_markers = { ".latexmkrc", ".git" },
         capabilities = require('cmp_nvim_lsp').default_capabilities(),
+        handlers = {
+          ["textDocument/publishDiagnostics"] = function() end,
+        },
         settings = {
           texlab = {
             build = {
               executable = "latexmk",
               args = { "-pdf", "-interaction=nonstopmode", "-synctex=1", "%f" },
-              onSave = true,
+              onSave = false,
+            },
+            chktex = {
+              onOpenAndSave = false,
+              onEdit = false,
             },
             forwardSearch = {
               executable = "skim", -- or "zathura" on Linux, "sumatrapdf" on Windows
