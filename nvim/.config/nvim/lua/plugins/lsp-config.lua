@@ -124,6 +124,7 @@ return {
         capabilities = require('cmp_nvim_lsp').default_capabilities(),
       }
 
+
       -- Enable Arduino LSP for .ino files
       vim.api.nvim_create_autocmd("FileType", {
         pattern = "arduino",
