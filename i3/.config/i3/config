@@ -1,0 +1,90 @@
+# i3 config — ported from AeroSpace (Ubuntu 24.04)
+# Colors match the old borders config: active 0x00e5ff / inactive 0x494d64
+
+set $mod Mod4          # Super; change to Mod1 if you prefer Alt
+set $term ghostty
+set $menu rofi -show drun
+
+font pango:Hack Nerd Font 10
+
+# AeroSpace-like look
+gaps inner 6
+gaps outer 0
+default_orientation auto
+for_window [class=".*"] border pixel 5
+# class                 border  bground text    indicator child
+client.focused          #00e5ff #1e1e2e #cdd6f4 #00e5ff   #00e5ff
+client.focused_inactive #494d64 #1e1e2e #cdd6f4 #494d64   #494d64
+client.unfocused        #494d64 #1e1e2e #cdd6f4 #494d64   #494d64
+client.urgent           #f38ba8 #1e1e2e #cdd6f4 #f38ba8   #f38ba8
+
+# --- startup ---
+exec --no-startup-id picom -b
+exec --no-startup-id waybar
+exec --no-startup-id dex -a -s /etc/xdg/autostart:~/.config/autostart
+
+# --- binds ---
+bindsym $mod+Return exec $term
+bindsym $mod+d exec $menu
+bindsym $mod+Shift+q kill
+bindsym $mod+Shift+c reload
+bindsym $mod+Shift+e exec i3-nagbar -t warning -m 'Exit i3?' -B 'Yes' 'i3-msg exit'
+
+# focus (hjkl, same as tmux)
+bindsym $mod+h focus left
+bindsym $mod+j focus down
+bindsym $mod+k focus up
+bindsym $mod+l focus right
+bindsym $mod+Shift+h move left
+bindsym $mod+Shift+j move down
+bindsym $mod+Shift+k move up
+bindsym $mod+Shift+l move right
+
+# AeroSpace 'alt-tab' style focus
+bindsym $mod+Tab workspace back_and_forth
+
+# workspaces 1..9 (AeroSpace cmd-1..9)
+set $ws1 "1"
+set $ws2 "2"
+set $ws3 "3"
+set $ws4 "4"
+set $ws5 "5"
+set $ws6 "6"
+set $ws7 "7"
+set $ws8 "8"
+set $ws9 "9"
+bindsym $mod+1 workspace $ws1
+bindsym $mod+2 workspace $ws2
+bindsym $mod+3 workspace $ws3
+bindsym $mod+4 workspace $ws4
+bindsym $mod+5 workspace $ws5
+bindsym $mod+6 workspace $ws6
+bindsym $mod+7 workspace $ws7
+bindsym $mod+8 workspace $ws8
+bindsym $mod+9 workspace $ws9
+bindsym $mod+Shift+1 move container to workspace $ws1
+bindsym $mod+Shift+2 move container to workspace $ws2
+bindsym $mod+Shift+3 move container to workspace $ws3
+bindsym $mod+Shift+4 move container to workspace $ws4
+bindsym $mod+Shift+5 move container to workspace $ws5
+bindsym $mod+Shift+6 move container to workspace $ws6
+bindsym $mod+Shift+7 move container to workspace $ws7
+bindsym $mod+Shift+8 move container to workspace $ws8
+bindsym $mod+Shift+9 move container to workspace $ws9
+
+# splits (AeroSpace join-with-*)
+bindsym $mod+Shift+semicolon split h
+bindsym $mod+semicolon split v
+bindsym $mod+f fullscreen toggle
+bindsym $mod+Shift+space floating toggle
+bindsym $mod+space focus mode_toggle
+
+# resize mode (AeroSpace resize)
+mode "resize" {
+    bindsym h resize shrink width 10 px
+    bindsym j resize grow height 10 px
+    bindsym k resize shrink height 10 px
+    bindsym l resize grow width 10 px
+    bindsym Escape mode "default"
+}
+bindsym $mod+r mode "resize"

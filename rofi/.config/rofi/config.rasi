@@ -1,0 +1,63 @@
+configuration {
+    modi: "drun,run,window";
+    show-icons: true;
+    font: "Hack Nerd Font 11";
+    display-drun: "Apps";
+    display-run: "Run";
+    display-window: "Windows";
+}
+
+* {
+    bg: #1e1e2e;
+    bg-alt: #181825;
+    fg: #cdd6f4;
+    fg-dim: #6c7086;
+    accent: #00e5ff;
+    urgent: #f38ba8;
+    background-color: @bg;
+    text-color: @fg;
+}
+
+window {
+    width: 700px;
+    border: 2px;
+    border-color: @accent;
+    border-radius: 8px;
+}
+
+inputbar {
+    padding: 10px;
+    margin: 8px;
+    background-color: @bg-alt;
+    border-radius: 6px;
+    children: [ prompt, entry ];
+}
+
+prompt {
+    text-color: @accent;
+    padding: 0 8px 0 0;
+}
+
+listview {
+    lines: 8;
+    padding: 0 8px;
+    scrollbar: false;
+}
+
+element {
+    padding: 6px 10px;
+    border-radius: 6px;
+}
+
+element selected {
+    background-color: @accent;
+    text-color: @bg;
+}
+
+element-text { vertical-align: 0.5; }
+
+element-icon {
+    size: 22px;
+    padding: 0 8px 0 0;
+    vertical-align: 0.5;
+}
