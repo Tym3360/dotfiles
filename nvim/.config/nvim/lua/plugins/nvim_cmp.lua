@@ -12,6 +12,19 @@ return{
     local cmp = require('cmp')
     local luasnip = require('luasnip')
     local types = require('cmp.types')
+    
+    -- Helper function to detect Arduino/PlatformIO files
+    local function is_arduino_file()
+      local filetype = vim.bo.filetype
+      if filetype == 'arduino' then return true end
+      if filetype == 'cpp' or filetype == 'c' then
+        local filename = vim.fn.expand('%:p')
+        return filename:match('%.ino$') ~= nil 
+            or filename:match('platformio%.ini') ~= nil
+            or filename:match('%.pio/') ~= nil
+      end
+      return false
+    end
 
     local has_words_before = function()
       local line, col = unpack(vim.api.nvim_win_get_cursor(0))
@@ -73,10 +86,11 @@ cmp.setup({
     end,
   },
 
-  -- Disable auto-completion globally, only trigger manually with Tab
+  -- Disable ALL auto-completion globally, ONLY trigger manually with Tab
   completion = {
     autocomplete = false,
     completeopt = 'menu,menuone,noinsert',
+    keyword_length = 1,
   },
   preselect = cmp.PreselectMode.Item,
   
@@ -97,7 +111,7 @@ cmp.setup({
       elseif luasnip.locally_jumpable(1) then
         luasnip.jump(1)
       elseif has_words_before() then
-        complete_with_context_sources()
+        cmp.complete()
       elseif luasnip.expand_or_jumpable() then
         luasnip.expand_or_jump()
       else
@@ -142,6 +156,47 @@ cmp.setup({
             return e1_fn
           end
         end
+      end,
+      cmp.config.compare.offset,
+      cmp.config.compare.exact,
+      cmp.config.compare.score,
+      cmp.config.compare.recently_used,
+      cmp.config.compare.kind,
+      cmp.config.compare.sort_text,
+      cmp.config.compare.length,
+      cmp.config.compare.order,
+    },
+  },
+})
+
+-- Filetype config for Arduino/PlatformIO: prioritize LSP completions
+cmp.setup.filetype({ 'cpp', 'c', 'arduino' }, {
+  completion = {
+    autocomplete = false,  -- ONLY trigger on Tab keypress
+  },
+  sources = cmp.config.sources({
+    { name = 'nvim_lsp', priority = 100 },  -- LSP completions first
+    { name = 'luasnip', priority = 90 },
+    { name = 'buffer', priority = 80 },
+    { name = 'path', priority = 70 },
+  }),
+  sorting = {
+    comparators = {
+      -- Prioritize Arduino-specific completions
+      function(entry1, entry2)
+        local function_kind = types.lsp.CompletionItemKind.Function
+        local variable_kind = types.lsp.CompletionItemKind.Variable
+        local snippet_kind = types.lsp.CompletionItemKind.Snippet
+        
+        -- Prioritize functions (Arduino functions like digitalWrite)
+        if entry1:get_kind() == function_kind and entry2:get_kind() ~= function_kind then
+          return true
+        end
+        if entry2:get_kind() == function_kind and entry1:get_kind() ~= function_kind then
+          return false
+        end
+        
+        return nil
       end,
       cmp.config.compare.offset,
       cmp.config.compare.exact,

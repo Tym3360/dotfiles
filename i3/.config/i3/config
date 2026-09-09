@@ -1,49 +1,78 @@
-# i3 config — ported from AeroSpace (Ubuntu 24.04)
-# Colors match the old borders config: active 0x00e5ff / inactive 0x494d64
+# i3 config — 1:1 port of ~/.aerospace.toml (config-version 2)
+# Source of truth: ~/dotfiles/i3/.config/i3/config
+#
+# Modifier mapping: macOS cmd → Super (Mod4), alt stays alt.
+# If you prefer alt-based AeroSpace-style binds, also see the commented
+# Mod1 block near the end.
 
-set $mod Mod4          # Super; change to Mod1 if you prefer Alt
+set $mod Mod4
 set $term ghostty
-set $menu rofi -show drun
+set $menu rofi -show drun     # Raycast/Spotlight replacement
 
 font pango:Hack Nerd Font 10
 
-# AeroSpace-like look
-gaps inner 6
-gaps outer 0
-default_orientation auto
+# ---------------------------------------------------------------- look ----
+# borders config: active_color=0xff00e5ff inactive_color=0xff494d64 width=5
 for_window [class=".*"] border pixel 5
-# class                 border  bground text    indicator child
 client.focused          #00e5ff #1e1e2e #cdd6f4 #00e5ff   #00e5ff
 client.focused_inactive #494d64 #1e1e2e #cdd6f4 #494d64   #494d64
 client.unfocused        #494d64 #1e1e2e #cdd6f4 #494d64   #494d64
 client.urgent           #f38ba8 #1e1e2e #cdd6f4 #f38ba8   #f38ba8
 
-# --- startup ---
+# gaps: inner 10, outer 10 (top 5 like aerospace)
+gaps inner 10
+gaps outer 10
+gaps top 5
+smart_gaps off
+
+# aerospace: tiles | accordion, auto orientation
+default_orientation auto
+workspace_auto_back_and_forth yes
+focus_follows_mouse no
+
+# ------------------------------------------------------------ startup ----
 exec --no-startup-id picom -b
 exec --no-startup-id waybar
 exec --no-startup-id dex -a -s /etc/xdg/autostart:~/.config/autostart
 
-# --- binds ---
+# ------------------------------------------------------------- basics ----
 bindsym $mod+Return exec $term
+bindsym $mod+space exec $menu                # cmd-space = Spotlight
 bindsym $mod+d exec $menu
+bindsym $mod+q kill                          # macOS cmd-q feel
+bindsym $mod+w kill
 bindsym $mod+Shift+q kill
-bindsym $mod+Shift+c reload
-bindsym $mod+Shift+e exec i3-nagbar -t warning -m 'Exit i3?' -B 'Yes' 'i3-msg exit'
 
-# focus (hjkl, same as tmux)
+# ------------------------------------------------------------- layout ----
+# cmd-slash = 'layout tiles horizontal vertical'
+bindsym $mod+slash layout toggle split
+# cmd-comma = 'layout accordion horizontal vertical'  (accordion ≈ stacking)
+bindsym $mod+comma layout stacking
+bindsym $mod+f fullscreen toggle
+
+# -------------------------------------------------------------- focus ----
+# cmd-h/j/k/l = focus left/down/up/right
 bindsym $mod+h focus left
 bindsym $mod+j focus down
 bindsym $mod+k focus up
 bindsym $mod+l focus right
+
+# --------------------------------------------------------------- move ----
+# cmd-shift-h/j/k/l = move left/down/up/right
 bindsym $mod+Shift+h move left
 bindsym $mod+Shift+j move down
 bindsym $mod+Shift+k move up
 bindsym $mod+Shift+l move right
 
-# AeroSpace 'alt-tab' style focus
-bindsym $mod+Tab workspace back_and_forth
+# ------------------------------------------------------------- resize ----
+# cmd-minus = 'resize smart -50' / cmd-equal = 'resize smart +50'
+bindsym $mod+minus resize shrink width 5 px or 5 ppt
+bindsym $mod+equal resize grow width 5 px or 5 ppt
+bindsym $mod+Shift+minus resize shrink height 5 px or 5 ppt
+bindsym $mod+Shift+equal resize grow height 5 px or 5 ppt
 
-# workspaces 1..9 (AeroSpace cmd-1..9)
+# --------------------------------------------------------- workspaces ----
+# cmd-1..9 = 'workspace N', persistent 1..9 (shown by waybar)
 set $ws1 "1"
 set $ws2 "2"
 set $ws3 "3"
@@ -62,6 +91,8 @@ bindsym $mod+6 workspace $ws6
 bindsym $mod+7 workspace $ws7
 bindsym $mod+8 workspace $ws8
 bindsym $mod+9 workspace $ws9
+
+# cmd-shift-1..9 = 'move-node-to-workspace N'
 bindsym $mod+Shift+1 move container to workspace $ws1
 bindsym $mod+Shift+2 move container to workspace $ws2
 bindsym $mod+Shift+3 move container to workspace $ws3
@@ -72,14 +103,49 @@ bindsym $mod+Shift+7 move container to workspace $ws7
 bindsym $mod+Shift+8 move container to workspace $ws8
 bindsym $mod+Shift+9 move container to workspace $ws9
 
-# splits (AeroSpace join-with-*)
-bindsym $mod+Shift+semicolon split h
-bindsym $mod+semicolon split v
-bindsym $mod+f fullscreen toggle
-bindsym $mod+Shift+space floating toggle
-bindsym $mod+space focus mode_toggle
+# alt-tab = 'workspace-back-and-forth'  (real alt-tab, like AeroSpace)
+bindsym Mod1+Tab workspace back_and_forth
+bindsym $mod+Tab workspace back_and_forth
+# alt-shift-tab = 'move-workspace-to-monitor --wrap-around next'
+bindsym Mod1+Shift+Tab move workspace to output next
 
-# resize mode (AeroSpace resize)
+# ------------------------------------------------------- service mode ----
+# cmd-shift-semicolon = 'mode service'
+bindsym $mod+Shift+semicolon mode "service"
+
+mode "service" {
+    # esc = ['reload-config', 'mode main']
+    bindsym Escape reload; mode "default"
+
+    # r = ['flatten-workspace-tree', 'mode main'] — i3 restart is closest
+    bindsym r restart; mode "default"
+
+    # f = ['layout floating tiling', 'mode main']
+    bindsym f floating toggle; mode "default"
+
+    # backspace = ['close-all-windows-but-current', 'mode main']
+    bindsym BackSpace exec --no-startup-id ~/scripts/i3-close-others.sh; mode "default"
+
+    # cmd-shift-h/j/k/l = 'join-with *' — no i3 equivalent; closest is
+    # toggling the split direction of the parent container
+    bindsym $mod+h split toggle; mode "default"
+    bindsym $mod+j split toggle; mode "default"
+    bindsym $mod+k split toggle; mode "default"
+    bindsym $mod+l split toggle; mode "default"
+
+    bindsym Escape mode "default"
+    bindsym $mod+Shift+semicolon mode "default"
+}
+
+# --------------------------------------------------------- extras --------
+# AeroSpace: move-mouse monitor-lazy-center — not natively possible in i3;
+# 'focus_follows_mouse no' (above) keeps focus where you click instead.
+
+# exit i3
+bindsym $mod+Shift+e exec i3-nagbar -t warning -m 'Exit i3?' -B 'Yes' 'i3-msg exit'
+
+# resize mode (kept from the earlier draft, on a free keybind)
+bindsym $mod+r mode "resize"
 mode "resize" {
     bindsym h resize shrink width 10 px
     bindsym j resize grow height 10 px
@@ -87,4 +153,3 @@ mode "resize" {
     bindsym l resize grow width 10 px
     bindsym Escape mode "default"
 }
-bindsym $mod+r mode "resize"

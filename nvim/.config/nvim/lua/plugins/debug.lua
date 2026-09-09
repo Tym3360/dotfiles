@@ -9,6 +9,48 @@ return {
     local dap, dapui = require("dap"), require("dapui")
     require("dapui").setup()
     require('netcoredbg-macOS-arm64').setup(require('dap'))
+
+    -- lldb-dap adapter (macOS Xcode CLT) for C/C++
+    dap.adapters.lldb = {
+      type = "server",
+      port = "${port}",
+      executable = {
+        command = "/Library/Developer/CommandLineTools/usr/bin/lldb-dap",
+        args = { "--port", "${port}" },
+      },
+    }
+
+    dap.configurations.cpp = {
+      {
+        name = "Launch",
+        type = "lldb",
+        request = "launch",
+        program = function()
+          return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+        end,
+        cwd = "${workspaceFolder}",
+        stopOnEntry = false,
+        args = {},
+        env = {},
+      },
+      {
+        name = "Launch with args",
+        type = "lldb",
+        request = "launch",
+        program = function()
+          return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
+        end,
+        args = function()
+          local args_str = vim.fn.input("Arguments: ")
+          return vim.split(args_str, " ")
+        end,
+        cwd = "${workspaceFolder}",
+        stopOnEntry = false,
+        env = {},
+      },
+    }
+    dap.configurations.c = dap.configurations.cpp
+
     dap.listeners.before.attach.dapui_config = function()
       dapui.open()
     end

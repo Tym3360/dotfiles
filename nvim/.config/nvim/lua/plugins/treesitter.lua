@@ -6,14 +6,15 @@ return {
   config = function()
     local config = require("nvim-treesitter.configs")
     config.setup({
-      ensure_installed = {"lua", "markdown", "markdown_inline", "python",  "bash", "c_sharp", "latex"},
+      ensure_installed = {"lua", "markdown", "markdown_inline", "python", "bash", "c_sharp", "latex", "c", "cpp"},
       highlight = { enable = true },
       indent = { enable = true },
     })
 
-    -- Autocmd belongs inside the config function
+    -- Auto-indent on save for treesitter-supported filetypes.
+    -- (Avoids running on every file, which is slow for large buffers.)
     vim.api.nvim_create_autocmd("BufWritePre", {
-      pattern = "*",
+      pattern = { "*.lua", "*.py", "*.c", "*.cpp", "*.h", "*.hpp", "*.cxx", "*.hxx", "*.tex", "*.bib", "*.md" },
       callback = function()
         vim.cmd("normal! gg=G``")
       end,

@@ -12,6 +12,7 @@ Place to store all the dot files and configuration scripts with GNU Stow
 | `i3` | `~/.config/i3` | tiling WM — port of AeroSpace setup (Ubuntu) |
 | `rofi` | `~/.config/rofi` | launcher (Raycast replacement) |
 | `waybar` | `~/.config/waybar` | status bar (sketchybar replacement) |
+| `scripts/` | `~/scripts` | helpers (`apply-i3.sh`, `i3-close-others.sh`, `ubuntu-setup.sh`) |
 
 ## Usage (fresh machine)
 

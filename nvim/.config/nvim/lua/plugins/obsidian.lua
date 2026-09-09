@@ -91,8 +91,13 @@ return {
         opts = { buffer = true },
       },
       -- Smart action depending on context, either follow link or toggle checkbox.
+      -- Falls back to nvim-cmp confirm if the completion menu is visible.
       ["<cr>"] = {
         action = function()
+          local cmp_ok, cmp = pcall(require, "cmp")
+          if cmp_ok and cmp.visible() then
+            return cmp.confirm({ select = true })
+          end
           return require("obsidian").util.smart_action()
         end,
         opts = { buffer = true, expr = true },
