@@ -24,8 +24,8 @@ else
 fi
 
 # --- 2. packages (skip this script's own deps if they're already there) ----
-if ! have stow || ! have i3 || ! have rofi || ! have waybar; then
-  log "Installing missing system packages (i3 rofi waybar stow …)"
+if ! have stow || ! have i3 || ! have rofi || ! have polybar; then
+  log "Installing missing system packages (i3 rofi polybar stow …)"
   if [[ $EUID -eq 0 ]]; then
     apt-get update -y && apt-get install -y \
       i3 i3lock picom polybar rofi stow jq xdg-user-dirs-gtk
