@@ -171,8 +171,10 @@ log "[10/12] GUI apps: Zen browser + Obsidian (Flatpak)"
 if [[ $WITH_APPS -eq 1 ]]; then
   sudorun apt-get install -y flatpak gnome-software-plugin-flatpak
   sudorun flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
-  flatpak install -y --noninteractive flathub app.zen_browser.zen
-  flatpak install -y --noninteractive flathub md.obsidian.Obsidian
+  # sudo is required: without a polkit agent (i3 session), a user-initiated
+  # system install fails with "Deploy not allowed for user"
+  sudorun flatpak install -y --noninteractive flathub app.zen_browser.zen
+  sudorun flatpak install -y --noninteractive flathub md.obsidian.Obsidian
   info "Zen + Obsidian installed. Re-login for .desktop entries."
 fi
 
