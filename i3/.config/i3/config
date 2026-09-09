@@ -35,7 +35,7 @@ exec_always --no-startup-id ~/.screenlayout/dual.sh || true
 # caps lock acts as escape (like Karabiner did on macOS)
 exec --no-startup-id setxkbmap -option caps:escape
 exec --no-startup-id picom -b
-exec --no-startup-id waybar
+exec_always --no-startup-id ~/.config/polybar/launch.sh
 exec --no-startup-id lxpolkit        # password dialogs (flatpak, mounts)
 exec --no-startup-id dex -a -s /etc/xdg/autostart:~/.config/autostart
 

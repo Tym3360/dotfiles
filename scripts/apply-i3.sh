@@ -28,17 +28,17 @@ if ! have stow || ! have i3 || ! have rofi || ! have waybar; then
   log "Installing missing system packages (i3 rofi waybar stow …)"
   if [[ $EUID -eq 0 ]]; then
     apt-get update -y && apt-get install -y \
-      i3 i3lock picom waybar rofi stow jq xdg-user-dirs-gtk
+      i3 i3lock picom polybar rofi stow jq xdg-user-dirs-gtk
   else
     sudo apt-get update -y && sudo apt-get install -y \
-      i3 i3lock picom waybar rofi stow jq xdg-user-dirs-gtk
+      i3 i3lock picom polybar rofi stow jq xdg-user-dirs-gtk
   fi
 fi
 
 # --- 3. stow the WM packages ------------------------------------------------
-log "Stowing i3 rofi waybar"
+log "Stowing i3 rofi polybar"
 cd "$DOTFILES_DIR"
-for pkg in i3 rofi waybar; do
+for pkg in i3 rofi waybar polybar; do
   # unstow first so updated configs replace older symlinks cleanly
   stow -t "$HOME" -D "$pkg" 2>/dev/null || true
   stow -t "$HOME" "$pkg" && echo "    stowed $pkg"
