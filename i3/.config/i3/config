@@ -7,7 +7,9 @@
 
 set $mod Mod4
 set $term ghostty
-set $menu rofi -show drun     # Raycast/Spotlight replacement
+# rofi is the launcher ONLY inside i3 — the GNOME session uses the built-in
+# Super search (Spotlight analog). rofi stays for i3 focus sessions.
+set $menu rofi -show drun
 
 font pango:Hack Nerd Font 10
 

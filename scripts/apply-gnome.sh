@@ -43,6 +43,14 @@ log "Installing Extension Manager (flatpak)"
 flatpak install -y --noninteractive --system flathub com.mattjakeman.ExtensionManager 2>/dev/null \
   || sudo flatpak install -y --noninteractive --system flathub com.mattjakeman.ExtensionManager
 
+# --- 6. launcher: GNOME built-in Super search (Spotlight analog) ------------
+# No extra tooling needed — this just verifies search providers are active.
+if gsettings get org.gnome.desktop.search-providers disable-external | grep -q true; then
+  log "Re-enabling GNOME search providers (apps, files, calculator)"
+  gsettings set org.gnome.desktop.search-providers disable-external false
+fi
+gsettings set org.gnome.desktop.interface enable-hot-corners false
+
 cat <<'NOTES'
 
   Next — inside Extension Manager (install tab):
@@ -58,7 +66,9 @@ cat <<'NOTES'
        "Dash to Dock"    → macOS-style dock
        "Blur my Shell"   → frosted-glass top bar/overview
        "AppIndicator"    → tray icons support
-    3. Log out/in after enabling extensions.
+    3. Launcher: use the built-in GNOME search (press Super and type).
+       It's the Spotlight analog. rofi remains installed as the i3-session
+       launcher (i3 has no GNOME search).
 
   Fonts: Settings → Appearance → Fonts → set "Hack Nerd Font" as monospace.
 NOTES
