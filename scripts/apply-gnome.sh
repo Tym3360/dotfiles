@@ -51,6 +51,18 @@ if gsettings get org.gnome.desktop.search-providers disable-external | grep -q t
 fi
 gsettings set org.gnome.desktop.interface enable-hot-corners false
 
+# --- 7. Super+Space → open GNOME search/overview ----------------------------
+# Spotlight muscle memory. Two steps: free the combo from input-source
+# switching, then rebind the overview toggle.
+log "Rebinding Super+Space → GNOME search/overview"
+gsettings set org.gnome.desktop.wm.keybindings switch-input-source "[]"
+gsettings set org.gnome.desktop.wm.keybindings switch-input-source-backward "[]"
+if gsettings set org.gnome.shell.keybindings toggle-overview "['<Super>space']" 2>/dev/null; then
+  info "Super+Space now opens the overview/search"
+else
+  info "this GNOME version has no toggle-overview key — Super alone still opens search"
+fi
+
 cat <<'NOTES'
 
   Next — inside Extension Manager (install tab):
