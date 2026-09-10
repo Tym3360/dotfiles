@@ -13,7 +13,7 @@ Place to store all the dot files and configuration scripts with GNU Stow
 | `rofi` | `~/.config/rofi` | launcher (Raycast replacement) |
 | `waybar` | `~/.config/waybar` | status bar — **Wayland only** (kept for future Hyprland; Ubuntu 24.04's package has no X11 backend) |
 | `polybar` | `~/.config/polybar` | status bar for i3/X11 (launch via `launch.sh`, i3 autostarts it) |
-| `scripts/` | `~/scripts` | helpers (`apply-i3.sh`, `i3-close-others.sh`, `ubuntu-setup.sh`) |
+| `scripts/` | `~/scripts` | helpers (`apply-i3.sh`, `apply-gnome.sh`, `i3-close-others.sh`, `ubuntu-setup.sh`) |
 
 ## Usage (fresh machine)
 
