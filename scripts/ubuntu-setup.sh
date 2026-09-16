@@ -161,7 +161,7 @@ if ! have brew; then
 fi
 BREW_PREFIX="$(brew --prefix)"
 eval "$("$BREW_PREFIX/bin/brew" shellenv)"
-brew install herdr pi-coding-agent
+brew install herdr pi-coding-agent uv
 info "herdr $(herdr --version 2>/dev/null | head -1 || echo installed)"
 info "pi    $(pi --version 2>/dev/null | head -1 || echo installed)"
 
