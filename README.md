@@ -11,6 +11,7 @@ Place to store all the dot files and configuration scripts with GNU Stow
 | `starship` | `~/.config/starship.toml` | jetpack preset |
 | `atuin` | `~/.config/atuin/config.toml` | shell history (daemon, sync, project-aware search) |
 | `fastfetch` | `~/.config/fastfetch/config.jsonc` | neofetch-style system info, lean modules |
+| `eza` | `~/.config/eza/config.yml`, `~/.config/eza/theme.yml` | ls replacement: catppuccin-mocha theme, icons, hyperlinks, color-scale |
 | `tmux` | `~/.tmux.conf`, `~/scripts` | prefix C-d — used on remote Linux boxes |
 | `ghostty` | `~/.config/ghostty` | terminal config (Linux path; macOS uses App Support — copy manually, not stowable) |
 | `herdr` | `~/.config/herdr`, `~/scripts` | agent multiplexer config + workspace-picker |
@@ -23,7 +24,7 @@ Place to store all the dot files and configuration scripts with GNU Stow
 ## Usage (fresh machine)
 
 ```bash
-stow -t ~ nvim tmux ghostty herdr i3 rofi waybar shell git starship atuin fastfetch
+stow -t ~ nvim tmux ghostty herdr i3 rofi waybar shell git starship atuin fastfetch eza
 ```
 
 If a package conflicts with existing files, move them away first, then re-stow.

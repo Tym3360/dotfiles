@@ -1,0 +1,5 @@
+# eza defaults (see man eza, EZA_CONFIG_DIR)
+group-directories-first: true
+icons: auto
+hyperlink: auto
+color-scale: all

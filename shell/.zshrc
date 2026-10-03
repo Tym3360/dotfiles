@@ -73,9 +73,11 @@ fi
 # ============================================
 # Aliases
 # ============================================
-# eza (ls replacement)
-alias ls='eza --group-directories-first'
-alias ll='eza -la --group-directories-first --git'
+# eza (ls replacement) — global defaults live in ~/.config/eza/{config.yml,theme.yml}
+alias ls='eza'
+alias ll='eza -l --header --icons --git'
+alias la='eza -la --header --icons --git'
+alias lt='eza -l --sort=oldest --header --icons --git'
 alias tree='eza --tree --git-ignore'
 
 # Git

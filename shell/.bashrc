@@ -34,6 +34,9 @@ fi
 # ============================================
 # Aliases
 # ============================================
-alias ls='eza --group-directories-first'
-alias ll='eza -la --group-directories-first --git'
+alias ls='eza'
+alias ll='eza -l --header --icons --git'
+alias la='eza -la --header --icons --git'
+alias lt='eza -l --sort=oldest --header --icons --git'
+alias tree='eza --tree --git-ignore'
 alias lg='lazygit'
