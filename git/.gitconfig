@@ -1,0 +1,9 @@
+# This is Git's per-user configuration file.
+[user]
+# Please adapt and uncomment the following lines:
+	name = Tymothé Carrier
+	email = tymothe.carrier@gmail.com
+[core]
+	excludesfile = /Users/tymothecarrrier/.gitignore_global
+[init]
+	defaultBranch = main

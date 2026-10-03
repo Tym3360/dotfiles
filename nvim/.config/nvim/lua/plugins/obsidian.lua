@@ -37,7 +37,16 @@ return {
       {
         name = "personal",
         path ="~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Obsidian Tym"
-
+      },
+      {
+        name = "capture-ss",
+        path = "/Volumes/LOCUS/Partage/Projects/Carbon Management/Capture SS/99_Notes_Obsidian/Obsidian_Capture_SS",
+        -- Same folder layout as the other vaults.
+        overrides = {
+          attachments = {
+            img_folder = "40 - Media",
+          },
+        },
       },
     },
 
