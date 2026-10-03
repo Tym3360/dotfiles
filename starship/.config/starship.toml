@@ -1,41 +1,15 @@
 add_newline = true
-# A minimal left prompt
+# Minimal prompt: directory + character on the left, everything else on the right
 format = """$directory$character"""
-palette = "catppuccin_mocha"
-# move the rest of the prompt to the right
 right_format = """$all"""
-command_timeout = 1000
+palette = "catppuccin_mocha"
 
 [character]
-vicmd_symbol = "[N] >>>"
 success_symbol = '[➜](bold green)'
-
-[directory.substitutions]
-'~/tests/starship-custom' = 'work-project'
+vicmd_symbol = '[N] >>>'
 
 [git_branch]
-format =  '[$symbol$branch(:$remote_branch)]($style)'
-
-[aws]
-format = '[$symbol(profile: "$profile" )(\(region: $region\) )]($style)'
-disabled = false
-style = 'bold blue'
-symbol = " "
-
-[golang]
-format = '[ ](bold cyan)'
-
-[kubernetes]
-symbol = '☸ '
-disabled = true
-detect_files = ['Dockerfile']
-format = '[$symbol$context( \($namespace\))]($style) '
-contexts = [
-{ context_pattern = "arn:aws:eks:us-west-2:577926974532:cluster/zd-pvc-omer", style = "green", context_alias = "omerxx", symbol = " " },
-]
-
-[docker_context]
-disabled = true
+format = '[$symbol$branch(:$remote_branch)]($style)'
 
 [palettes.catppuccin_mocha]
 rosewater = "#f5e0dc"

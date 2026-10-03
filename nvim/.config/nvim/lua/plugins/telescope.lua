@@ -1,6 +1,6 @@
 return {
   {
-	'nvim-telescope/telescope.nvim', tag = '0.1.8',
+	'nvim-telescope/telescope.nvim', -- unpinned: 0.1.8 broke on nvim-treesitter `main` (ft_to_lang removed)
      	dependencies = { 'nvim-lua/plenary.nvim' },
 	config = function()
 		local builtin = require("telescope.builtin")
