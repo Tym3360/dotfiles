@@ -3,6 +3,11 @@ return {
   version = "*",  -- recommended, use latest release instead of latest commit
   lazy = true,
   ft = "markdown",
+  config = function(_, opts)
+    require("obsidian").setup(opts)
+    -- TickTick-style pickers, done-date toggle and Home.md startup behaviour.
+    require("obsidian_tasks").setup()
+  end,
   -- Replace the above line with this if you only want to load obsidian.nvim for markdown files in your vault:
   -- event = {
   --   -- If you want to use the home shortcut '~' here you need to call 'vim.fn.expand'.
@@ -35,18 +40,8 @@ return {
     -- current markdown file being edited.
     workspaces = {
       {
-        name = "personal",
-        path ="~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Obsidian Tym"
-      },
-      {
         name = "capture-ss",
-        path = "/Volumes/LOCUS/Partage/Projects/Carbon Management/Capture SS/99_Notes_Obsidian/Obsidian_Capture_SS",
-        -- Same folder layout as the other vaults.
-        overrides = {
-          attachments = {
-            img_folder = "40 - Media",
-          },
-        },
+        path = "/run/user/386641961/gvfs/smb-share:server=fgen-srv-smb.genie.usherbrooke.ca,share=locus/Partage/Projects/Carbon Management/Capture SS/99_Notes_Obsidian/Obsidian_Capture_SS",
       },
     },
 
@@ -92,12 +87,51 @@ return {
         end,
         opts = { noremap = false, expr = true, buffer = true },
       },
-      -- Toggle check-boxes.
+      -- Toggle check-boxes. Custom toggle appends a ✅ done date like the
+      -- Obsidian Tasks plugin; falls back to obsidian.nvim's plain toggle.
       ["<leader>ch"] = {
         action = function()
+          local ok, tasks = pcall(require, "obsidian_tasks")
+          if ok then
+            return tasks.toggle()
+          end
           return require("obsidian").util.toggle_checkbox()
         end,
-        opts = { buffer = true },
+        opts = { buffer = true, desc = "Toggle checkbox (adds done date)" },
+      },
+      -- Task pickers (from lua/obsidian_tasks.lua). Buffer-local so the
+      -- global <leader>ot (opencode) and <leader>oh (header/source) keep working
+      -- outside vault markdown buffers.
+      ["<leader>tt"] = {
+        action = function()
+          vim.cmd("ObsidianTasksToday")
+        end,
+        opts = { buffer = true, desc = "Tasks: today / overdue" },
+      },
+      ["<leader>ta"] = {
+        action = function()
+          vim.cmd("ObsidianTasksAll")
+        end,
+        opts = { buffer = true, desc = "Tasks: all open" },
+      },
+      ["<leader>ti"] = {
+        action = function()
+          vim.cmd("ObsidianTasksInbox")
+        end,
+        opts = { buffer = true, desc = "Tasks: inbox (no date)" },
+      },
+      ["<leader>td"] = {
+        action = function()
+          vim.cmd("ObsidianTasksDone")
+        end,
+        opts = { buffer = true, desc = "Tasks: last 30 days" },
+      },
+      ["<leader>tw"] = {
+        action = function()
+          local client = require("obsidian").get_client()
+          vim.cmd("edit " .. vim.fn.fnameescape(tostring(client.dir) .. "/Home.md"))
+        end,
+        opts = { buffer = true, desc = "Open Home.md" },
       },
       -- Smart action depending on context, either follow link or toggle checkbox.
       -- Falls back to nvim-cmp confirm if the completion menu is visible.
@@ -106,6 +140,10 @@ return {
           local cmp_ok, cmp = pcall(require, "cmp")
           if cmp_ok and cmp.visible() then
             return cmp.confirm({ select = true })
+          end
+          local tasks_ok, tasks = pcall(require, "obsidian_tasks")
+          if tasks_ok then
+            return tasks.smart_action()
           end
           return require("obsidian").util.smart_action()
         end,
@@ -119,6 +157,7 @@ return {
         opts = { buffer = true, desc = "New note from template" },
       },
       -- Create a new daily note.
+      -- NOTE: needs templates/nvim/Daily Note.md to exist in the vault
       ["<leader>od"] = {
         action = function()
           vim.cmd("ObsidianToday")
@@ -135,14 +174,12 @@ return {
     -- Customize the note ID to use the title (human-readable) instead of a random ID.
     ---@param title string|?
     ---@return string
+    -- Vault convention: filenames ARE the title, lowercase + spaces avoided
     note_id_func = function(title)
-      -- If a title is given, use it as the ID (with spaces replaced by dashes).
-      -- Otherwise, use a 4-digit suffix based on a random number.
       if title ~= nil then
-        -- Transform title to a valid filename: lowercase, replace spaces with dashes
-        return title:gsub(" ", "-"):gsub("[^A-Za-z0-9-]", ""):lower()
+        return title
       else
-        -- If no title is provided, use a timestamp-based fallback
+        -- timestamp-based fallback when no title provided
         return tostring(os.date("%Y-%m-%d")) .. "-" .. tostring(math.random(1000, 9999))
       end
     end,
@@ -155,9 +192,8 @@ return {
     --  * "prepend_note_path", e.g. '[[foo-bar.md|Foo Bar]]'
     --  * "use_path_only", e.g. '[[foo-bar.md]]'
     -- Or you can set it to a function that takes a table of options and returns a string, like this:
-    wiki_link_func = function(opts)
-      return require("obsidian.util").wiki_link_id_prefix(opts)
-    end,
+    -- Vault uses plain `[[Note name]]` links (no id|alias prefix) — see capture-ss notes
+    wiki_link_func = "use_alias_only",
 
     -- Optional, customize how markdown links are formatted.
     markdown_link_func = function(opts)
@@ -227,8 +263,8 @@ return {
     ---@param url string
     follow_url_func = function(url)
       -- Open the URL in the default web browser.
-      vim.fn.jobstart({"open", url})  -- Mac OS
-      -- vim.fn.jobstart({"xdg-open", url})  -- linux
+      vim.fn.jobstart({"xdg-open", url})  -- Linux
+      -- vim.fn.jobstart({"open", url})  -- Mac OS
       -- vim.cmd(':silent exec "!start ' .. url .. '"') -- Windows
       -- vim.ui.open(url) -- need Neovim 0.10.0+
     end,
@@ -237,14 +273,15 @@ return {
     -- file it will be ignored but you can customize this behavior here.
     ---@param img string
     follow_img_func = function(img)
-      vim.fn.jobstart { "qlmanage", "-p", img }  -- Mac OS quick look preview
-      -- vim.fn.jobstart({"xdg-open", url})  -- linux
+      vim.fn.jobstart({ "xdg-open", img })  -- Linux
+      -- vim.fn.jobstart { "qlmanage", "-p", img }  -- Mac OS quick look preview
       -- vim.cmd(':silent exec "!start ' .. url .. '"') -- Windows
     end,
 
     -- Optional, set to true if you use the Obsidian Advanced URI plugin.
     -- https://github.com/Vinzent03/obsidian-advanced-uri
-    use_advanced_uri = true,
+    -- Advanced URI community plugin is NOT installed in the capture-ss vault
+    use_advanced_uri = false,
 
     -- Optional, set to true to force ':ObsidianOpen' to bring the app to the foreground.
     open_app_foreground = false,
@@ -327,7 +364,7 @@ return {
       -- The default folder to place images in via `:ObsidianPasteImg`.
       -- If this is a relative path it will be interpreted as relative to the vault root.
       -- You can always override this per image by passing a full path to the command instead of just a filename.
-      img_folder = "40 - Media/49 - Other",  -- This is the default
+      img_folder = "40 - Media",  -- flat folder, matches vault convention
 
     },
   },

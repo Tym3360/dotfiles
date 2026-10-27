@@ -5,13 +5,46 @@ vim.cmd("set shiftwidth=2")
 vim.g.mapleader = " "
 vim.g.maplocalleader = "\\"
 
+-- Make rustup proxies (cargo, rustc, rust-analyzer, rustfmt, clippy) reachable.
+-- ~/.cargo/env is only sourced from ~/.profile and ~/.bashrc, so Neovim
+-- started from a shell that does not read those (e.g. fish) would otherwise
+-- not find rust-analyzer.
+do
+  local cargo_bin = vim.fn.expand("~/.cargo/bin")
+  local path = vim.env.PATH or ""
+  if vim.fn.isdirectory(cargo_bin) == 1 and not path:find(cargo_bin, 1, true) then
+    vim.env.PATH = cargo_bin .. ":" .. path
+  end
+end
+
 -- Setup lazy.nvim
 require("config.lazy")
 
 vim.api.nvim_create_autocmd("FileType", {
   pattern = "python",
   callback = function()
-    vim.keymap.set('n', '<F5>', ':w<CR>:!poetry run python %<CR>', { buffer = true, desc = "Run Python file with Poetry" })
+    vim.keymap.set('n', '<F5>', ':w<CR>:!uv run python %<CR>', { buffer = true, desc = "Run Python file with uv" })
+  end
+})
+
+-- Rust filetype settings
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "rust",
+  callback = function()
+    -- rustfmt default indentation
+    vim.bo.tabstop = 4
+    vim.bo.softtabstop = 4
+    vim.bo.shiftwidth = 4
+    vim.bo.expandtab = true
+
+    -- Only map F5 inside an actual Cargo project (single .rs files support LSP
+    -- but have nothing to `cargo run`).
+    if vim.fs.find("Cargo.toml", { upward = true })[1] then
+      vim.keymap.set('n', '<F5>', function()
+        vim.cmd("write")
+        vim.cmd("!cargo run 2>&1")
+      end, { buffer = true, desc = "Run Rust project with cargo" })
+    end
   end
 })
 
@@ -27,7 +60,7 @@ vim.api.nvim_create_autocmd("FileType", {
     -- Only set the cmake makeprg if a CMakeLists.txt is reachable from this file.
     -- Otherwise (single-file projects) leave :make pointing at plain make.
     if vim.fs.find("CMakeLists.txt", { upward = true })[1] then
-      vim.bo.makeprg = "cmake --build build -j$(sysctl -n hw.ncpu) 2>&1"
+      vim.bo.makeprg = "cmake --build build -j$(nproc) 2>&1"
     end
 
     vim.keymap.set('n', '<F5>', function()

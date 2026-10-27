@@ -3,7 +3,7 @@ return {
   lazy = false,
   config = function()
     -- Use zathura as viewer
-    vim.g.vimtex_view_method = "skim"
+    vim.g.vimtex_view_method = "zathura"
     vim.g.tex_flavor = 'latex'
 
     -- Compiler settings

@@ -1,44 +1,53 @@
 return {
   "nvim-treesitter/nvim-treesitter",
-  -- The old `master` branch is archived and does NOT support Neovim 0.12+.
-  -- `main` is the rewritten plugin with a new API (setup/highlight/indent
-  -- modules are gone; features are enabled via Neovim built-ins).
   branch = "main",
   lazy = false,
   build = ":TSUpdate",
   config = function()
-    local ts = require("nvim-treesitter")
+    require("nvim-treesitter").setup({
+      install_dir = vim.fn.stdpath("data") .. "/site",
+    })
 
-    -- Install parsers (no-op for ones already installed).
-    -- Sync wait so render-markdown.nvim has parsers available on first open.
-    pcall(function()
-      local task = ts.install({
-        "lua", "markdown", "markdown_inline", "python", "bash",
-        "c_sharp", "latex", "c", "cpp", "html",
-      })
-      if task then
-        task:wait(300000)
-      end
+    -- Install/update parsers. Using :wait() guarantees parsers are ready before
+    -- the first buffer is opened. On subsequent startups this is a fast no-op.
+    local langs = {
+      "lua",
+      "markdown",
+      "markdown_inline",
+      "python",
+      "bash",
+      "c_sharp",
+      "c",
+      "cpp",
+      "rust",
+    }
+
+    local ok, err = pcall(function()
+      require("nvim-treesitter").install(langs):wait(300000)
     end)
+    if not ok then
+      vim.notify("nvim-treesitter parser install failed: " .. tostring(err), vim.log.levels.WARN)
+    end
 
-    -- Enable treesitter highlighting + indentation per filetype.
-    -- (Replaces the legacy `highlight = { enable = true }` / `indent = { enable = true }` setup.)
+    -- Enable treesitter highlighting for supported filetypes.
     vim.api.nvim_create_autocmd("FileType", {
-      pattern = { "lua", "markdown", "python", "bash", "cs", "c", "cpp", "html", "tex", "latex" },
-      callback = function(args)
-        local buf = args.buf
-        local lang = vim.treesitter.language.get_lang(vim.bo[buf].filetype)
-        -- Skip if parser isn't installed (e.g. during first-run download).
-        if not (lang and vim.treesitter.language.add(lang)) then
-          return
-        end
-        pcall(vim.treesitter.start, buf)
-        vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+      pattern = { "lua", "markdown", "python", "bash", "sh", "cs", "c", "cpp", "rust" },
+      callback = function()
+        vim.treesitter.start()
+      end,
+    })
+
+    -- Enable treesitter-based indentation for supported filetypes.
+    vim.api.nvim_create_autocmd("FileType", {
+      pattern = { "lua", "python", "c", "cpp", "cs", "rust" },
+      callback = function()
+        vim.bo.indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
       end,
     })
 
     -- Auto-indent on save for treesitter-supported filetypes.
-    -- (Avoids running on every file, which is slow for large buffers.)
+    -- NOTE: *.rs is deliberately excluded - Rust buffers are formatted with
+    -- rustfmt on save instead (see lua/plugins/rust.lua).
     vim.api.nvim_create_autocmd("BufWritePre", {
       pattern = { "*.lua", "*.py", "*.c", "*.cpp", "*.h", "*.hpp", "*.cxx", "*.hxx", "*.tex", "*.bib", "*.md" },
       callback = function()

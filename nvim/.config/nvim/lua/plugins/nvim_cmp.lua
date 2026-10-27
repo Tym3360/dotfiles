@@ -62,23 +62,6 @@ return{
         or before:match('[%w_%.:]+%(%s*[%w_]*$') ~= nil
     end
 
-    local complete_with_context_sources = function()
-      if is_path_context() then
-        cmp.complete({
-          config = {
-            sources = cmp.config.sources({
-              { name = 'path' },
-              { name = 'buffer' },
-              { name = 'nvim_lsp' },
-              { name = 'luasnip' },
-            }),
-          },
-        })
-      else
-        cmp.complete()
-      end
-    end
-
 cmp.setup({
   snippet = {
     expand = function(args)
@@ -93,18 +76,48 @@ cmp.setup({
     keyword_length = 1,
   },
   preselect = cmp.PreselectMode.Item,
+  -- Only prefix/substring matches. Without this, `pri` also drags in
+  -- PartialEq, ParentDir, park_timeout_ms... via subsequence matching.
+  matching = { disallow_fuzzy_matching = true },
   
   mapping = cmp.mapping.preset.insert({
     ['<C-b>'] = cmp.mapping.scroll_docs(-4),
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
     ['<C-Space>'] = cmp.mapping.complete(),
     ['<C-e>'] = cmp.mapping.abort(),
-    ['<CR>'] = cmp.mapping.confirm({
-      select = true,
-      behavior = cmp.ConfirmBehavior.Replace,
-    }),
+    -- Enter: confirm the selection when the menu is open, insert a newline
+    -- otherwise. (Explicit guard so a closed menu can never accept an
+    -- implicit first item.)
+    -- NOTE: cmp.core:confirm is called directly instead of the cmp.confirm
+    -- wrapper: the wrapper unconditionally re-runs cmp.core:complete with
+    -- reason TriggerOnly after every confirm, which re-opens the menu without
+    -- a Tab press (very visible in prose/markdown). Confirming via core keeps
+    -- the menu closed until Tab (or <C-Space>) is pressed again.
+    ['<CR>'] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        local entry = cmp.core.view:get_selected_entry()
+          or cmp.core.view:get_first_entry()
+        if entry then
+          cmp.core:confirm(entry, {
+            behavior = cmp.ConfirmBehavior.Replace,
+          })
+          return
+        end
+        cmp.confirm({
+          select = true,
+          behavior = cmp.ConfirmBehavior.Replace,
+        }, function()
+          -- Fallback path (wrapper) also re-triggers: close the session.
+          vim.schedule(cmp.abort)
+        end)
+      else
+        fallback()
+      end
+    end, { 'i', 'c' }),
     
-    -- Tab: trigger completion or navigate/expand snippets
+    -- Tab: completion first, then snippet navigation. Inside a snippet
+    -- placeholder Tab jumps to the next placeholder; it never expands a
+    -- snippet trigger (pick snippets from the menu instead).
     ['<Tab>'] = cmp.mapping(function(fallback)
       if cmp.visible() then
         cmp.select_next_item()
@@ -133,7 +146,7 @@ cmp.setup({
   sources = cmp.config.sources({
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
-    { name = 'buffer' },
+    { name = 'buffer', option = { keyword_length = 2 } },
     { name = 'path' },
   }),
   sorting = {
@@ -177,7 +190,7 @@ cmp.setup.filetype({ 'cpp', 'c', 'arduino' }, {
   sources = cmp.config.sources({
     { name = 'nvim_lsp', priority = 100 },  -- LSP completions first
     { name = 'luasnip', priority = 90 },
-    { name = 'buffer', priority = 80 },
+    { name = 'buffer', priority = 80, option = { keyword_length = 2 } },
     { name = 'path', priority = 70 },
   }),
   sorting = {
@@ -219,9 +232,34 @@ cmp.setup.filetype('markdown', {
     { name = 'obsidian_tags' },
     { name = 'nvim_lsp' },
     { name = 'luasnip' },
-    { name = 'buffer' },
+    { name = 'buffer', option = { keyword_length = 2 } },
     { name = 'path' },
   }),
+})
+
+-- Auto-trigger completion while typing inside LuaSnip snippet placeholders.
+-- Tab stays reserved for jumping between placeholders, so completion inside a
+-- snippet must come automatically while typing (VSCode-style behaviour).
+-- Outside snippets nothing auto-triggers: Tab opens the menu manually.
+vim.api.nvim_create_autocmd("TextChangedI", {
+  callback = function()
+    local ls = require("luasnip")
+    -- Only inside an active snippet, and only when there is a typed prefix
+    -- worth completing (>= 2 word chars, avoids popping on every keystroke).
+    if not ls.in_snippet() then
+      return
+    end
+    local cmp = require("cmp")
+    if cmp.visible() then
+      return
+    end
+    local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+    local before_cursor = vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(1, col)
+    local prefix = before_cursor:match("[%w_]+$") or ""
+    if #prefix >= 2 then
+      cmp.complete()
+    end
+  end,
 })
 
 -- Auto-trigger completion for LaTeX specific commands

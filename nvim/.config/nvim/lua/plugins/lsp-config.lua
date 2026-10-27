@@ -36,6 +36,15 @@ return {
       "williamboman/mason-lspconfig.nvim"
     },
     config = function()
+      -- Give every LSP server nvim-cmp's capabilities. Without this the server
+      -- never advertises snippetSupport, so snippet completions it sends arrive
+      -- as flat text. `vim.lsp.config('*')` is a default that applies to all
+      -- servers configured through vim.lsp.config/enable, and rustaceanvim
+      -- merges it into its own server config too.
+      vim.lsp.config('*', {
+        capabilities = require('cmp_nvim_lsp').default_capabilities(),
+      })
+
       -- Configure LSP servers with custom settings using vim.lsp.config
       -- Lua Language Server configuration
       vim.lsp.config('lua_ls', {
@@ -73,7 +82,10 @@ return {
         settings = {
           pylsp = {
             plugins = {
-              pycodestyle = { enabled = true },
+              -- pycodestyle disabled: it emits all PEP 8 style warnings
+              -- (E501 line-too-long, whitespace, etc.). Re-enable or add
+              -- "ignore = { 'E501', ... }" here if you ever want it back.
+              pycodestyle = { enabled = false },
               pyflakes = { enabled = true },
               pylint = { enabled = false },
               mccabe = { enabled = false },
@@ -88,7 +100,6 @@ return {
         cmd = { "texlab" },
         filetypes = { "tex", "plaintex", "bib" },
         root_markers = { ".latexmkrc", ".git" },
-        capabilities = require('cmp_nvim_lsp').default_capabilities(),
         handlers = {
           ["textDocument/publishDiagnostics"] = function() end,
         },
@@ -104,7 +115,7 @@ return {
               onEdit = false,
             },
             forwardSearch = {
-              executable = "skim", -- or "zathura" on Linux, "sumatrapdf" on Windows
+              executable = "zathura",
               args = { "--synctex-forward", "%l:1:%f", "%p" },
             },
           },
@@ -119,16 +130,49 @@ return {
       vim.lsp.config.arduino_language_server = {
         cmd = {
           "arduino-language-server",
-          "-cli-config", vim.fn.expand("~/Library/Arduino15/arduino-cli.yaml"),
+          "-cli-config", vim.fn.expand("~/.arduino15/arduino-cli.yaml"),
           "-clangd", "clangd",
           "-cli", "arduino-cli",
           "-fqbn", "arduino:avr:uno" -- Default board, can be overridden per project
         },
         filetypes = { "arduino" },  -- Only for .ino files (standalone Arduino projects)
         root_markers = { "*.ino" },
-        capabilities = require('cmp_nvim_lsp').default_capabilities(),
       }
 
+
+      -- rust_analyzer configuration
+      -- Uses the rustup-installed binary (~/.cargo/bin/rust-analyzer); no Mason
+      -- entry on purpose, so Mason doesn't shadow the rustup toolchain version.
+      vim.lsp.config.rust_analyzer = {
+        cmd = { "rust-analyzer" },
+        filetypes = { "rust" },
+        root_markers = { "Cargo.toml", "rust-toolchain.toml", "rust-toolchain", ".git" },
+        settings = {
+          ["rust-analyzer"] = {
+            -- Run `cargo clippy` for diagnostics instead of plain `check`
+            checkOnSave = true,
+            check = { command = "clippy" },
+            procMacro = { enable = true },
+            -- Load build-script generated code
+            cargo = {
+              buildScripts = { enable = true },
+              features = "all",
+            },
+            inlayHints = {
+              parameterHints = { enable = true },
+              typeHints = { enable = true },
+            },
+          },
+        },
+      }
+
+      -- Enable rust_analyzer for Rust files
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "rust",
+        callback = function()
+          vim.lsp.enable("rust_analyzer")
+        end,
+      })
 
       -- Clangd (C/C++) configuration - works for both regular C++ and PlatformIO
       vim.lsp.config.clangd = {
@@ -145,7 +189,6 @@ return {
           "platformio.ini",
           ".pio",
         },
-        capabilities = require('cmp_nvim_lsp').default_capabilities(),
         settings = {
           clangd = {
             InlayHints = { Enabled = true },

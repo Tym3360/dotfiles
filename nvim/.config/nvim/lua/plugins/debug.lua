@@ -63,6 +63,8 @@ return {
     dap.listeners.before.event_exited.dapui_config = function()
       dapui.close()
     end
+    vim.keymap.set('n', '<leader>dK', function() require('dapui').eval() end, { desc = 'DAP: Eval under cursor (hover popup)' })
+    vim.keymap.set('v', '<leader>dK', function() require('dapui').eval() end, { desc = 'DAP: Eval selection' })
     vim.keymap.set('n','<Leader>dc', function() require('dap').continue() end)
     vim.keymap.set('n', '<F10>', function() require('dap').step_over() end)
     vim.keymap.set('n', '<F11>', function() require('dap').step_into() end)
