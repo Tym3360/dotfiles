@@ -2,7 +2,7 @@ return {
   "lervag/vimtex",
   lazy = false,
   config = function()
-    -- Use zathura as viewer
+    -- Use skim as viewer
     vim.g.vimtex_view_method = "skim"
     vim.g.tex_flavor = 'latex'
 

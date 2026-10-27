@@ -36,6 +36,15 @@ return {
       "williamboman/mason-lspconfig.nvim"
     },
     config = function()
+      -- Give every LSP server nvim-cmp's capabilities. Without this the server
+      -- never advertises snippetSupport, so snippet completions it sends arrive
+      -- as flat text. `vim.lsp.config('*')` is a default that applies to all
+      -- servers configured through vim.lsp.config/enable, and rustaceanvim
+      -- merges it into its own server config too.
+      vim.lsp.config('*', {
+        capabilities = require('cmp_nvim_lsp').default_capabilities(),
+      })
+
       -- Configure LSP servers with custom settings using vim.lsp.config
       -- Lua Language Server configuration
       vim.lsp.config('lua_ls', {
@@ -92,7 +101,6 @@ return {
         cmd = { "texlab" },
         filetypes = { "tex", "plaintex", "bib" },
         root_markers = { ".latexmkrc", ".git" },
-        capabilities = require('cmp_nvim_lsp').default_capabilities(),
         handlers = {
           ["textDocument/publishDiagnostics"] = function() end,
         },
@@ -130,7 +138,6 @@ return {
         },
         filetypes = { "arduino" },  -- Only for .ino files (standalone Arduino projects)
         root_markers = { "*.ino" },
-        capabilities = require('cmp_nvim_lsp').default_capabilities(),
       }
 
 
@@ -141,7 +148,6 @@ return {
         cmd = { "rust-analyzer" },
         filetypes = { "rust" },
         root_markers = { "Cargo.toml", "rust-toolchain.toml", "rust-toolchain", ".git" },
-        capabilities = require('cmp_nvim_lsp').default_capabilities(),
         settings = {
           ["rust-analyzer"] = {
             -- Run `cargo clippy` for diagnostics instead of plain `check`
@@ -184,7 +190,6 @@ return {
           "platformio.ini",
           ".pio",
         },
-        capabilities = require('cmp_nvim_lsp').default_capabilities(),
         settings = {
           clangd = {
             InlayHints = { Enabled = true },

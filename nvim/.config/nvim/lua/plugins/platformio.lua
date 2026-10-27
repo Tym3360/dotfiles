@@ -1,5 +1,8 @@
 return {
   'anurag3301/nvim-platformio.lua',
+  cond = function()
+    return vim.fn.executable("pio") == 1
+  end,
   dependencies = {
     { 'akinsho/toggleterm.nvim' },
   },
