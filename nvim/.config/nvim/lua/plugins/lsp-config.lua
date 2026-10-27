@@ -73,7 +73,11 @@ return {
         settings = {
           pylsp = {
             plugins = {
-              pycodestyle = { enabled = true },
+              -- Style checker (line length, whitespace, blank lines...):
+              -- causes a wall of warnings in python files. Re-enable with
+              -- { enabled = true, config = { maxLineLength = 88 } }
+              -- if you ever want PEP 8 style nits back.
+              pycodestyle = { enabled = false },
               pyflakes = { enabled = true },
               pylint = { enabled = false },
               mccabe = { enabled = false },
@@ -129,6 +133,41 @@ return {
         capabilities = require('cmp_nvim_lsp').default_capabilities(),
       }
 
+
+      -- rust_analyzer configuration
+      -- Uses the rustup-installed binary (~/.cargo/bin/rust-analyzer); no Mason
+      -- entry on purpose, so Mason doesn't shadow the rustup toolchain version.
+      vim.lsp.config.rust_analyzer = {
+        cmd = { "rust-analyzer" },
+        filetypes = { "rust" },
+        root_markers = { "Cargo.toml", "rust-toolchain.toml", "rust-toolchain", ".git" },
+        capabilities = require('cmp_nvim_lsp').default_capabilities(),
+        settings = {
+          ["rust-analyzer"] = {
+            -- Run `cargo clippy` for diagnostics instead of plain `check`
+            checkOnSave = true,
+            check = { command = "clippy" },
+            procMacro = { enable = true },
+            -- Load build-script generated code (_mix ins, generated code mainly)
+            cargo = {
+              buildScripts = { enable = true },
+              features = "all",
+            },
+            inlayHints = {
+              parameterHints = { enable = true },
+              typeHints = { enable = true },
+            },
+          },
+        },
+      }
+
+      -- Enable rust_analyzer for Rust files
+      vim.api.nvim_create_autocmd("FileType", {
+        pattern = "rust",
+        callback = function()
+          vim.lsp.enable("rust_analyzer")
+        end,
+      })
 
       -- Clangd (C/C++) configuration - works for both regular C++ and PlatformIO
       vim.lsp.config.clangd = {

@@ -17,6 +17,12 @@ return {
 
     -- see below for full list of optional dependencies 👇
   },
+  -- Custom config: run both obsidian.nvim setup AND the TickTick-style task
+  -- pickers module (see lua/obsidian_tasks.lua).
+  config = function(_, opts)
+    require("obsidian").setup(opts)
+    require("obsidian_tasks").setup()
+  end,
   init = function()
     -- Set conceallevel for markdown files (required for obsidian.nvim UI features)
     vim.api.nvim_create_autocmd("FileType", {
@@ -92,17 +98,26 @@ return {
         end,
         opts = { noremap = false, expr = true, buffer = true },
       },
-      -- Toggle check-boxes.
+      -- Toggle check-boxes. Ticks through the obsidian_tasks module so the
+      -- ✅ done date is written exactly like the Obsidian Tasks plugin does
+      -- (util.toggle_checkbox only flips the box, it never writes dates).
       ["<leader>ch"] = {
         action = function()
-          return require("obsidian").util.toggle_checkbox()
+          require("obsidian_tasks").toggle_task_line()
         end,
         opts = { buffer = true },
       },
       -- Smart action depending on context, either follow link or toggle checkbox.
       -- Falls back to nvim-cmp confirm if the completion menu is visible.
+      -- Task lines get the TickTick-style toggle first (deferred with
+      -- vim.schedule, ✅ date byte-compatible with the Obsidian Tasks plugin).
+      -- Returns nil on task lines: expr mappings replay their return value as
+      -- keystrokes, so returning a truthy value would be typed literally.
       ["<cr>"] = {
         action = function()
+          if require("obsidian_tasks").toggle_if_task() then
+            return nil
+          end
           local cmp_ok, cmp = pcall(require, "cmp")
           if cmp_ok and cmp.visible() then
             return cmp.confirm({ select = true })
@@ -244,7 +259,8 @@ return {
 
     -- Optional, set to true if you use the Obsidian Advanced URI plugin.
     -- https://github.com/Vinzent03/obsidian-advanced-uri
-    use_advanced_uri = true,
+    -- Not installed in this vault.
+    use_advanced_uri = false,
 
     -- Optional, set to true to force ':ObsidianOpen' to bring the app to the foreground.
     open_app_foreground = false,

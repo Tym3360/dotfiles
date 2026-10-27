@@ -14,7 +14,7 @@ return {
     pcall(function()
       local task = ts.install({
         "lua", "markdown", "markdown_inline", "python", "bash",
-        "c_sharp", "latex", "c", "cpp", "html",
+        "c_sharp", "latex", "c", "cpp", "html", "rust",
       })
       if task then
         task:wait(300000)
@@ -24,7 +24,7 @@ return {
     -- Enable treesitter highlighting + indentation per filetype.
     -- (Replaces the legacy `highlight = { enable = true }` / `indent = { enable = true }` setup.)
     vim.api.nvim_create_autocmd("FileType", {
-      pattern = { "lua", "markdown", "python", "bash", "cs", "c", "cpp", "html", "tex", "latex" },
+      pattern = { "lua", "markdown", "python", "bash", "cs", "c", "cpp", "html", "tex", "latex", "rust" },
       callback = function(args)
         local buf = args.buf
         local lang = vim.treesitter.language.get_lang(vim.bo[buf].filetype)
@@ -40,7 +40,7 @@ return {
     -- Auto-indent on save for treesitter-supported filetypes.
     -- (Avoids running on every file, which is slow for large buffers.)
     vim.api.nvim_create_autocmd("BufWritePre", {
-      pattern = { "*.lua", "*.py", "*.c", "*.cpp", "*.h", "*.hpp", "*.cxx", "*.hxx", "*.tex", "*.bib", "*.md" },
+      pattern = { "*.lua", "*.py", "*.c", "*.cpp", "*.h", "*.hpp", "*.cxx", "*.hxx", "*.tex", "*.bib", "*.md", "*.rs" },
       callback = function()
         vim.cmd("normal! gg=G``")
       end,

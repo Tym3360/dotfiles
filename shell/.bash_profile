@@ -24,3 +24,4 @@ source ~/git-flow-completion.bash 2>/dev/null
 
 # bashrc handles the rest (prompt, fzf, editor)
 source ~/.bashrc
+. "$HOME/.cargo/env"

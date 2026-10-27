@@ -99,10 +99,36 @@ cmp.setup({
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
     ['<C-Space>'] = cmp.mapping.complete(),
     ['<C-e>'] = cmp.mapping.abort(),
-    ['<CR>'] = cmp.mapping.confirm({
-      select = true,
-      behavior = cmp.ConfirmBehavior.Replace,
-    }),
+    -- Enter: confirm the selection when the menu is open, insert a newline
+    -- otherwise. (Explicit guard so a closed menu can never accept an
+    -- implicit first item.)
+    -- NOTE: we call cmp.core:confirm directly instead of the cmp.confirm
+    -- wrapper: the wrapper unconditionally re-runs cmp.core:complete with
+    -- reason TriggerOnly after every confirm, which re-opens the menu without
+    -- a Tab press (very visible in prose/markdown where the caret sits right
+    -- behind the confirmed word). Confirming via core keeps the menu closed
+    -- until Tab (or <C-Space>) is pressed again.
+    ['<CR>'] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        local entry = cmp.core.view:get_selected_entry()
+          or cmp.core.view:get_first_entry()
+        if entry then
+          cmp.core:confirm(entry, {
+            behavior = cmp.ConfirmBehavior.Replace,
+          })
+          return
+        end
+        cmp.confirm({
+          select = true,
+          behavior = cmp.ConfirmBehavior.Replace,
+        }, function()
+          -- Fallback path (wrapper) also re-triggers: close the session.
+          vim.schedule(cmp.abort)
+        end)
+      else
+        fallback()
+      end
+    end, { 'i', 'c' }),
     
     -- Tab: trigger completion or navigate/expand snippets
     ['<Tab>'] = cmp.mapping(function(fallback)
@@ -222,6 +248,31 @@ cmp.setup.filetype('markdown', {
     { name = 'buffer' },
     { name = 'path' },
   }),
+})
+
+-- Auto-trigger completion while typing inside LuaSnip snippet placeholders.
+-- Tab stays reserved for jumping between placeholders, so completion in a
+-- snippet must come automatically while typing (VSCode-style behavior).
+-- Outside snippets nothing auto-triggers: Tab opens the menu manually.
+vim.api.nvim_create_autocmd("TextChangedI", {
+  callback = function()
+    local ls = require("luasnip")
+    -- Only inside an active snippet, and only when there is a typed prefix
+    -- worth completing (>= 2 word chars, avoids popping on every keystroke).
+    if not ls.in_snippet() then
+      return
+    end
+    local cmp = require("cmp")
+    if cmp.visible() then
+      return
+    end
+    local line, col = unpack(vim.api.nvim_win_get_cursor(0))
+    local before_cursor = vim.api.nvim_buf_get_lines(0, line - 1, line, true)[1]:sub(1, col)
+    local prefix = before_cursor:match("[%w_]+$") or ""
+    if #prefix >= 2 then
+      cmp.complete()
+    end
+  end,
 })
 
 -- Auto-trigger completion for LaTeX specific commands

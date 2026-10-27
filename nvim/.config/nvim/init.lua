@@ -15,6 +15,27 @@ vim.api.nvim_create_autocmd("FileType", {
   end
 })
 
+-- Rust filetype settings
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = "rust",
+  callback = function()
+    -- rustfmt default indentation
+    vim.bo.tabstop = 4
+    vim.bo.softtabstop = 4
+    vim.bo.shiftwidth = 4
+    vim.bo.expandtab = true
+
+    -- Only map F5 inside an actual Cargo project (single .rs files support LSP
+    -- but have nothing to `cargo run`).
+    if vim.fs.find("Cargo.toml", { upward = true })[1] then
+      vim.keymap.set('n', '<F5>', function()
+        vim.cmd("write")
+        vim.cmd("!cargo run 2>&1")
+      end, { buffer = true, desc = "Run Rust project with cargo" })
+    end
+  end
+})
+
 -- C/C++ filetype settings
 vim.api.nvim_create_autocmd("FileType", {
   pattern = { "c", "cpp" },

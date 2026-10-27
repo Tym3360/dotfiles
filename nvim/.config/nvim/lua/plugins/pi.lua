@@ -2,8 +2,8 @@ return {
   "pablopunk/pi.nvim",
   cmd = { "PiAsk", "PiAskSelection", "PiCancel", "PiLog" },
   opts = {
-    provider = "opencode",
-    model = "big-pickle",
+    provider = "opencode-go",
+    model = "glm-5.3-flash",
   },
   keys = {
     { "<leader>ai", ":PiAsk<CR>", mode = "n", desc = "Ask pi" },

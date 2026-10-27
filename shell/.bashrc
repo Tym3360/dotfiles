@@ -40,3 +40,4 @@ alias la='eza -la --header --icons --git'
 alias lt='eza -l --sort=oldest --header --icons --git'
 alias tree='eza --tree --git-ignore'
 alias lg='lazygit'
+. "$HOME/.cargo/env"
