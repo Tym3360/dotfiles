@@ -18,7 +18,7 @@ ls.add_snippets("arduino", {
 
 void setup() {{
   // Initialize serial communication
-  Serial.begin({baud});
+  Serial.begin({});
   
   {}// Initialize pins here
   
@@ -32,7 +32,7 @@ void loop() {{
     i(1, "9600"),
     i(2),
     i(3),
-  }, { delimiters = "{}" }),
+  }, { delimiters = "{}" })),
 
   -- pinMode
   s("pinmode", fmt("pinMode({}, {});", {
@@ -241,7 +241,7 @@ ls.add_snippets("cpp", {
 #include <Arduino.h>
 
 void setup() {{
-  Serial.begin({baud});
+  Serial.begin({});
   {}// Initialize here
 }}
 
@@ -252,5 +252,5 @@ void loop() {{
     i(1, "9600"),
     i(2),
     i(3),
-  }, { delimiters = "{}" }),
+  }, { delimiters = "{}" })),
 })

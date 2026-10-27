@@ -20,7 +20,7 @@ return {
     ls.config.set_config({
       history = true, -- keep around last snippet local to jump back
       updateevents = "TextChanged,TextChangedI", -- update changes as you type
-      enable_autosnippets = true,
+      enable_autosnippets = false,
       ext_opts = {
         [require("luasnip.util.types").choiceNode] = {
           active = {
@@ -45,15 +45,12 @@ return {
     -- Load custom snippets from ~/.config/nvim/LuaSnip/
     require("luasnip.loaders.from_lua").load({paths = "~/.config/nvim/LuaSnip"})
 
-    -- Custom LaTeX snippets
+    -- Custom LaTeX snippets.
+    -- Triggers also defined in LuaSnip/tex.lua (ali, beg, bf, cite, enum, it,
+    -- item, lem, mat, proof, ref, tab, thm) are intentionally NOT duplicated
+    -- here -- that file is the canonical definition and its versions are
+    -- better (e.g. `rep(1)` keeps \end{} in sync with \begin{}).
     ls.add_snippets("tex", {
-      -- Begin/End environment
-      s("beg", {
-        t("\\begin{"), i(1, "environment"), t("}"),
-        t({"", "\t"}), i(0),
-        t({"", "\\end{"}), f(function(args) return args[1][1] end, {1}), t("}"),
-      }),
-
       -- Inline math
       s("mm", {
         t("$"), i(1), t("$"), i(0)
@@ -69,12 +66,6 @@ return {
       s("eq", {
         t({"\\begin{equation}", "\t"}), i(1),
         t({"", "\\end{equation}"}), i(0)
-      }),
-
-      -- Align environment
-      s("ali", {
-        t({"\\begin{align}", "\t"}), i(1),
-        t({"", "\\end{align}"}), i(0)
       }),
 
       -- Fraction
@@ -109,46 +100,10 @@ return {
         t({"", "\\end{figure}"}), i(0)
       }),
 
-      -- Table environment
-      s("tab", {
-        t({"\\begin{table}[htbp]", "\t\\centering"}),
-        t({"", "\t\\caption{"}), i(1, "caption"), t("}"),
-        t({"", "\t\\label{tab:"}), i(2, "label"), t("}"),
-        t({"", "\t\\begin{tabular}{"}), i(3, "c c c"), t("}"),
-        t({"", "\t\t\\toprule"}),
-        t({"", "\t\t"}), i(4, "Header 1"), t(" & "), i(5, "Header 2"), t(" \\\\"),
-        t({"", "\t\t\\midrule"}),
-        t({"", "\t\t"}), i(0),
-        t({"", "\t\t\\bottomrule"}),
-        t({"", "\t\\end{tabular}"}),
-        t({"", "\\end{table}"}),
-      }),
-
-      -- Itemize
-      s("item", {
-        t({"\\begin{itemize}", "\t\\item "}), i(1),
-        t({"", "\\end{itemize}"}), i(0)
-      }),
-
-      -- Enumerate
-      s("enum", {
-        t({"\\begin{enumerate}", "\t\\item "}), i(1),
-        t({"", "\\end{enumerate}"}), i(0)
-      }),
-
       -- Description
       s("desc", {
         t({"\\begin{description}", "\t\\item["}), i(1, "term"), t("] "), i(2),
         t({"", "\\end{description}"}), i(0)
-      }),
-
-      -- Text formatting
-      s("bf", {
-        t("\\textbf{"), i(1), t("}"), i(0)
-      }),
-
-      s("it", {
-        t("\\textit{"), i(1), t("}"), i(0)
       }),
 
       s("tt", {
@@ -180,64 +135,48 @@ return {
         t("\\lim_{"), i(1, "x \\to \\infty"), t("} "), i(0)
       }),
 
-      -- Matrices
-      s("mat", {
-        t({"\\begin{bmatrix}", "\t"}), i(1),
-        t({"", "\\end{bmatrix}"}), i(0)
-      }),
-
       s("pmat", {
         t({"\\begin{pmatrix}", "\t"}), i(1),
         t({"", "\\end{pmatrix}"}), i(0)
       }),
 
-      -- Theorem-like environments
-      s("thm", {
-        t({"\\begin{theorem}", "\t"}), i(1),
-        t({"", "\\end{theorem}"}), i(0)
-      }),
-
-      s("lem", {
-        t({"\\begin{lemma}", "\t"}), i(1),
-        t({"", "\\end{lemma}"}), i(0)
-      }),
-
-      s("proof", {
-        t({"\\begin{proof}", "\t"}), i(1),
-        t({"", "\\end{proof}"}), i(0)
-      }),
-
       -- Citation and reference
-      s("cite", {
-        t("\\cite{"), i(1), t("}"), i(0)
-      }),
-
-      s("ref", {
-        t("\\ref{"), i(1), t("}"), i(0)
-      }),
-
       s("eqref", {
         t("\\eqref{"), i(1), t("}"), i(0)
       }),
     })
 
-    -- Keymaps for LuaSnip
+    -- Snippet keys. These are the ONLY things that touch snippets, so <Tab>
+    -- is free to mean "complete" and nothing else.
+    -- <C-k>: expand the trigger at the cursor, or advance to the next
+    --        placeholder of the current snippet.
     vim.keymap.set({"i", "s"}, "<C-k>", function()
-      if ls.expand_or_jumpable() then
+      if ls.expand_or_locally_jumpable() then
         ls.expand_or_jump()
       end
     end, { silent = true, desc = "LuaSnip: Expand or jump forward" })
 
+    -- <C-j>: back to the previous placeholder.
     vim.keymap.set({"i", "s"}, "<C-j>", function()
-      if ls.jumpable(-1) then
+      if ls.locally_jumpable(-1) then
         ls.jump(-1)
       end
     end, { silent = true, desc = "LuaSnip: Jump backward" })
 
+    -- <C-l>: step past a closing bracket/quote and stay in insert mode, so
+    -- after accepting "println!()" you can type ";" without <Esc>. Cycles a
+    -- snippet choice node instead when one is active.
+    local CLOSERS = { [")"] = true, ["]"] = true, ["}"] = true, ['"'] = true, ["'"] = true, ["`"] = true }
     vim.keymap.set("i", "<C-l>", function()
       if ls.choice_active() then
         ls.change_choice(1)
+        return
       end
-    end, { silent = true, desc = "LuaSnip: Change choice" })
+      local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+      local ch = vim.api.nvim_get_current_line():sub(col + 1, col + 1)
+      if CLOSERS[ch] then
+        vim.api.nvim_win_set_cursor(0, { row, col + 1 })
+      end
+    end, { silent = true, desc = "Step out of closing bracket / cycle choice" })
   end,
 }

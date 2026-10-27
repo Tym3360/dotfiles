@@ -30,98 +30,72 @@ tex.in_text = function()
   return not tex.in_mathzone()
 end
 
--- Auto snippets
+-- Math helpers. These used to be autosnippets (fire-while-typing); they are
+-- now ordinary snippets, so they only expand on <Tab> / <C-k> or from the
+-- completion menu. Returned alongside `snippets` at the bottom of the file.
 local autosnippets = {
   -- Inline math
-  s({trig = "mk", snippetType = "autosnippet"},
+  s({trig = "mk"},
     fmta("$<>$", {i(1)}),
     {condition = tex.in_text}
   ),
   
-  -- Display math
-  s({trig = "dm", snippetType = "autosnippet"},
-    fmta(
-[[
-\[
-  <>
-\]
-]], {i(1)}),
-    {condition = tex.in_text}
-  ),
-
   -- Fractions
-  s({trig = "//", snippetType = "autosnippet"},
+  s({trig = "//"},
     fmta("\\frac{<>}{<>}", {i(1), i(2)}),
     {condition = tex.in_mathzone}
   ),
 
   -- Superscript
-  s({trig = "sr", regTrig = true, snippetType = "autosnippet"},
+  s({trig = "sr", regTrig = true},
     fmta("<>^{<>}", {f(function(_, snip) return snip.captures[1] end), i(1)}),
     {condition = tex.in_mathzone}
   ),
 
   -- Subscript
-  s({trig = "([%a%)%]%}])_", regTrig = true, snippetType = "autosnippet"},
+  s({trig = "([%a%)%]%}])_", regTrig = true},
     fmta("<>_{<>}", {f(function(_, snip) return snip.captures[1] end), i(1)}),
     {condition = tex.in_mathzone}
   ),
 
   -- Square root
-  s({trig = "sq", snippetType = "autosnippet"},
+  s({trig = "sq"},
     fmta("\\sqrt{<>}", {i(1)}),
     {condition = tex.in_mathzone}
   ),
 
-  -- Sum
-  s({trig = "sum", snippetType = "autosnippet"},
-    fmta("\\sum_{<>}^{<>}", {i(1, "i=1"), i(2, "n")}),
-    {condition = tex.in_mathzone}
-  ),
-
-  -- Integral
-  s({trig = "int", snippetType = "autosnippet"},
-    fmta("\\int_{<>}^{<>}", {i(1), i(2)}),
-    {condition = tex.in_mathzone}
-  ),
-
-  -- Limit
-  s({trig = "lim", snippetType = "autosnippet"},
-    fmta("\\lim_{<> \\to <>}", {i(1, "n"), i(2, "\\infty")}),
-    {condition = tex.in_mathzone}
-  ),
-
   -- Greek letters (common ones)
-  s({trig = ";a", snippetType = "autosnippet"}, t("\\alpha"), {condition = tex.in_mathzone}),
-  s({trig = ";b", snippetType = "autosnippet"}, t("\\beta"), {condition = tex.in_mathzone}),
-  s({trig = ";g", snippetType = "autosnippet"}, t("\\gamma"), {condition = tex.in_mathzone}),
-  s({trig = ";d", snippetType = "autosnippet"}, t("\\delta"), {condition = tex.in_mathzone}),
-  s({trig = ";e", snippetType = "autosnippet"}, t("\\epsilon"), {condition = tex.in_mathzone}),
-  s({trig = ";t", snippetType = "autosnippet"}, t("\\theta"), {condition = tex.in_mathzone}),
-  s({trig = ";l", snippetType = "autosnippet"}, t("\\lambda"), {condition = tex.in_mathzone}),
-  s({trig = ";m", snippetType = "autosnippet"}, t("\\mu"), {condition = tex.in_mathzone}),
-  s({trig = ";p", snippetType = "autosnippet"}, t("\\pi"), {condition = tex.in_mathzone}),
-  s({trig = ";s", snippetType = "autosnippet"}, t("\\sigma"), {condition = tex.in_mathzone}),
-  s({trig = ";o", snippetType = "autosnippet"}, t("\\omega"), {condition = tex.in_mathzone}),
+  s({trig = ";a"}, t("\\alpha"), {condition = tex.in_mathzone}),
+  s({trig = ";b"}, t("\\beta"), {condition = tex.in_mathzone}),
+  s({trig = ";g"}, t("\\gamma"), {condition = tex.in_mathzone}),
+  s({trig = ";d"}, t("\\delta"), {condition = tex.in_mathzone}),
+  s({trig = ";e"}, t("\\epsilon"), {condition = tex.in_mathzone}),
+  s({trig = ";t"}, t("\\theta"), {condition = tex.in_mathzone}),
+  s({trig = ";l"}, t("\\lambda"), {condition = tex.in_mathzone}),
+  s({trig = ";m"}, t("\\mu"), {condition = tex.in_mathzone}),
+  s({trig = ";p"}, t("\\pi"), {condition = tex.in_mathzone}),
+  s({trig = ";s"}, t("\\sigma"), {condition = tex.in_mathzone}),
+  s({trig = ";o"}, t("\\omega"), {condition = tex.in_mathzone}),
 
   -- Parentheses
-  s({trig = "lr(", snippetType = "autosnippet"},
+  s({trig = "lr("},
     fmta("\\left( <> \\right)", {i(1)}),
     {condition = tex.in_mathzone}
   ),
   
-  s({trig = "lr[", snippetType = "autosnippet"},
+  s({trig = "lr["},
     fmta("\\left[ <> \\right]", {i(1)}),
     {condition = tex.in_mathzone}
   ),
   
-  s({trig = "lr{", snippetType = "autosnippet"},
+  s({trig = "lr{"},
     fmta("\\left\\{ <> \\right\\}", {i(1)}),
     {condition = tex.in_mathzone}
   ),
 
-  -- Text in math mode
-  s({trig = "tt", snippetType = "autosnippet"},
+  -- Text in math mode. Trigger is `tx`, not `tt`: the inline snippet keeps
+  -- `tt` for \texttt{}.
+  s({trig = "tx"},
     fmta("\\text{<>}", {i(1)}),
     {condition = tex.in_mathzone}
   ),
@@ -386,4 +360,6 @@ local snippets = {
 ]], {i(1), f(create_label, {1}), rep(1)})),
 }
 
-return snippets, autosnippets
+-- Autosnippets are converted to regular snippets: enable_autosnippets is off,
+-- so these only expand on <Tab> / <C-k> and never fire while typing.
+return vim.list_extend(snippets, autosnippets)
