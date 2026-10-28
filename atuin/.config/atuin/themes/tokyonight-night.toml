@@ -1,0 +1,34 @@
+# Tokyo Night (night) theme for Atuin
+# https://github.com/folke/tokyonight.nvim
+#
+# IMPORTANT: every key here is a FOREGROUND colour only. Atuin never paints a
+# background, so putting the Tokyo Night background (#1a1b26) in `Base` makes
+# the whole TUI render invisible text on the terminal's own dark background.
+
+[theme]
+name = "tokyonight-night"
+
+[colors]
+# General body text (falls back to your terminal's default fg if omitted)
+Base = "#c0caf5"
+# Secondary / dim text. Tokyo Night's comment colour (#565f89) is too low
+# contrast on #1a1b26, so use fg_dark-ish instead.
+Muted = "#a9b1d6"
+
+Title = "#7aa2f7"
+Important = "#7aa2f7"
+Guidance = "#7dcfff"
+# Hints, separators, timestamps, "muted" lines in `atuin resume`
+Annotation = "#737aa2"
+
+AlertInfo = "#9ece6a"
+AlertWarn = "#e0af68"
+AlertError = "#f7768e"
+
+# Command syntax highlighting (enable with `[ui] syntax_highlight = true`)
+SyntaxCommand = "#7aa2f7"
+SyntaxFlag = "#e0af68"
+SyntaxString = "#9ece6a"
+SyntaxVariable = "#bb9af7"
+SyntaxOperator = "#89ddff"
+SyntaxComment = "#565f89"
