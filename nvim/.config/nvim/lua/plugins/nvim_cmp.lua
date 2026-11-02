@@ -246,8 +246,37 @@ vim.api.nvim_create_autocmd("TextChangedI", {
     local ls = require("luasnip")
     -- Only inside an active snippet, and only when there is a typed prefix
     -- worth completing (>= 2 word chars, avoids popping on every keystroke).
+    -- LuaSnip's in_snippet() is row-based: it reports true for the whole
+    -- row range of the snippet, even when the cursor has moved outside the
+    -- active placeholder. Gate on the active node's actual mark region so
+    -- completion only fires while typing inside a placeholder.
     if not ls.in_snippet() then
       return
+    end
+    do
+      local session = require("luasnip.session")
+      local node = session.current_nodes[vim.api.nvim_get_current_buf()]
+      if not (node and node.mark) then
+        return
+      end
+      local ok, from, to = pcall(function()
+        local a, b = node.mark:pos_begin_end_raw()
+        return a, b
+      end)
+      if not ok or not from or not to then
+        return
+      end
+      local pos = vim.api.nvim_win_get_cursor(0)
+      local row0 = pos[1] - 1
+      if row0 < from[1] or row0 > to[1] then
+        return
+      end
+      if row0 == from[1] and pos[2] < from[2] then
+        return
+      end
+      if row0 == to[1] and pos[2] > to[2] then
+        return
+      end
     end
     local cmp = require("cmp")
     if cmp.visible() then

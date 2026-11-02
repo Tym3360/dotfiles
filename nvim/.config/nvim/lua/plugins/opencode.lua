@@ -4,11 +4,14 @@ return{
     -- Recommended for `ask()` and `select()`.
     -- Required for `snacks` provider.
     ---@module 'snacks' <- Loads `snacks.nvim` types for configuration intellisense.
-    { "folke/snacks.nvim", opts = { input = {}, picker = {}, terminal = {} } },
+    -- Configured centrally in lua/plugins/snacks.lua
+    "folke/snacks.nvim",
     "folke/which-key.nvim",
   },
   config = function()
-    local opencode_cmd = 'opencode --port'
+    -- OpenCode v2 has no `--port` flag (it was v1-only). A plain `opencode`
+    -- opens the TUI attached to the background service the plugin discovers.
+    local opencode_cmd = 'opencode'
     ---@type snacks.terminal.Opts
     local snacks_terminal_opts = {
       win = {
@@ -54,17 +57,13 @@ return{
     vim.keymap.set('n', '+', '<C-a>', { desc = 'Increment', noremap = true })
     vim.keymap.set('n', '-', '<C-x>', { desc = 'Decrement', noremap = true })
 
-    -- Optionally show upon submitting prompt
+    -- Optionally show the terminal when OpenCode starts executing
     vim.api.nvim_create_autocmd('User', {
-      pattern = { 'OpencodeEvent:tui.command.execute' },
-      callback = function(args)
-        ---@type opencode.server.Event
-        local event = args.data.event
-        if event.properties.command == 'prompt.submit' then
-          local win = require('snacks.terminal').get(opencode_cmd, { create = false })
-          if win then
-            win:show()
-          end
+      pattern = { 'OpencodeEvent:session.execution.started' },
+      callback = function()
+        local win = require('snacks.terminal').get(opencode_cmd, { create = false })
+        if win then
+          win:show()
         end
       end,
     })

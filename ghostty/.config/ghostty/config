@@ -47,6 +47,16 @@
 # # which is explained in the docs for that config option.
 # # Just for example:
 # resize-overlay-duration = 4s 200ms
-theme = Catppuccin Mocha
+theme = TokyoNight
 macos-option-as-alt = false
+
+# Copy selected text to clipboard automatically
+copy-on-select = true
+
+
+
+# Bind Ctrl+V to paste from clipboard
+keybind = ctrl+v=paste_from_clipboard
+
+background-opacity = 0.85
 
