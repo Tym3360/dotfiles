@@ -37,10 +37,14 @@ return {
       end,
     })
 
-    -- Auto-indent on save for treesitter-supported filetypes.
-    -- (Avoids running on every file, which is slow for large buffers.)
+    -- Auto-indent code on save for treesitter-supported filetypes.
+    -- NOTE: *.rs is deliberately excluded - Rust buffers are formatted with
+    -- rustfmt on save instead (configured in lsp-config.lua).
+    -- NOTE: *.md, *.tex and *.bib are deliberately excluded: `gg=G` reindents
+    -- prose, and markdown has no indentexpr here, so it inherits indentation
+    -- and turns a normal README into hundreds of leading spaces on every line.
     vim.api.nvim_create_autocmd("BufWritePre", {
-      pattern = { "*.lua", "*.py", "*.c", "*.cpp", "*.h", "*.hpp", "*.cxx", "*.hxx", "*.tex", "*.bib", "*.md", "*.rs" },
+      pattern = { "*.lua", "*.py", "*.c", "*.cpp", "*.h", "*.hpp", "*.cxx", "*.hxx" },
       callback = function()
         vim.cmd("normal! gg=G``")
       end,

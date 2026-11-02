@@ -8,12 +8,12 @@ configuration {
 }
 
 * {
-    bg: #1e1e2e;
-    bg-alt: #181825;
-    fg: #cdd6f4;
-    fg-dim: #6c7086;
-    accent: #00e5ff;
-    urgent: #f38ba8;
+    bg: #1a1b26;
+    bg-alt: #16161e;
+    fg: #c0caf5;
+    fg-dim: #565f89;
+    accent: #7aa2f7;
+    urgent: #f7768e;
     background-color: @bg;
     text-color: @fg;
 }

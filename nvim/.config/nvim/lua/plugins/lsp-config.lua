@@ -116,8 +116,8 @@ return {
               onEdit = false,
             },
             forwardSearch = {
-              executable = "skim", -- or "zathura" on Linux, "sumatrapdf" on Windows
-              args = { "--synctex-forward", "%l:1:%f", "%p" },
+              executable = "/Applications/Skim.app/Contents/SharedSupport/displayline",
+              args = { "-g", "%l", "%p", "%f" },
             },
           },
         },

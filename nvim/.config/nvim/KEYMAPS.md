@@ -23,6 +23,36 @@
 | `<leader>fh` | Help tags |
 | `<leader>oh` | Toggle header ↔ source (C/C++) ⚠️ overlaps `<leader>o` opencode group |
 
+## Snacks — pickers, git, UI
+| Key | Action |
+|---|---|
+| `<leader>sf` / `<leader>sg` | Find files / grep |
+| `<leader>sw` | Grep word or visual selection |
+| `<leader>sb` / `<leader>sr` | Buffers / recent files |
+| `<leader>sl` | Lines in current buffer |
+| `<leader>sh` / `<leader>sk` | Help pages / keymaps |
+| `<leader>sd` / `<leader>sD` | Diagnostics (workspace / buffer) |
+| `<leader>ss` / `<leader>sS` | LSP symbols (document / workspace) |
+| `<leader>sc` / `<leader>sC` | Command history / commands |
+| `<leader>sm` / `<leader>sq` | Marks / quickfix list |
+| `<leader>su` / `<leader>s/` | Undo history / search history |
+| `<leader>sR` | Resume last picker |
+| `<leader>e` | Snacks file explorer |
+| `<leader>gg` / `<leader>gB` | Lazygit / open file in browser |
+| `<leader>gS` / `<leader>gL` / `<leader>gD` / `<leader>gF` | Git status / log / diff / log file |
+| `<leader>bd` | Delete buffer (keeps window layout) |
+| `<leader>cR` | Rename file (LSP-aware) |
+| `<C-/>` | Toggle terminal (normal + terminal mode) |
+| `<leader>.` / `<leader>S` | Toggle scratch buffer / select scratch buffer |
+| `<leader>z` / `<leader>Z` | Zen mode / zoom |
+| `<leader>n` / `<leader>un` | Notification history / dismiss notifications |
+| `<leader>us` / `<leader>uw` | Toggle spell / wrap |
+| `<leader>ud` / `<leader>uT` / `<leader>uh` / `<leader>ug` | Toggle diagnostics / treesitter / inlay hints / indent |
+| `<leader>ul` / `<leader>uL` | Toggle line numbers / relative numbers |
+| `<leader>uc` / `<leader>ub` | Toggle conceal level / dark background |
+
+> Telescope remains available under `<leader>f*`; Snacks pickers live under `<leader>s*`.
+
 ## LSP (buffer-local, when LSP attached)
 | Key | Action |
 |---|---|
@@ -103,10 +133,13 @@ language comes from friendly-snippets.
 | `<leader>ot` | normal | Toggle opencode terminal |
 | `<S-C-u>` / `<S-C-d>` | normal | opencode half page up / down |
 
-## File explorer
+## File explorer (snacks.nvim — neo-tree was removed)
 | Key | Action |
 |---|---|
-| `<Ctrl-n>` | Reveal current file in neo-tree (left side) |
+| `<Ctrl-n>` | Toggle file tree (snacks explorer) |
+| `<leader>e` | Toggle file tree (snacks explorer) |
+
+Explorer basics: `a` new file, `d` delete, `r` rename, `y` copy-path, `<c-q>` open in quickfix/fuzzy, follow-file follows the current buffer by default.
 
 ## Obsidian (markdown buffers in vault, buffer-local)
 | Key | Action |
@@ -196,3 +229,53 @@ Commands also work outside markdown buffers: `:ObsidianTasksToday/All/Inbox/Done
 ### Notes & known conflicts
 - `<leader>o` is registered as an **opencode group** by which-key, but telescope also binds `<leader>oh` (header toggle). Pressing `<leader>o` may wait for the group menu; if that annoys you, move the C/C++ header toggle to e.g. `<leader>sh`.
 - which-key preset is "helix" mode with delay 0, so popups appear instantly.
+
+---
+
+## LazyVim look & feel (added)
+
+### Buffers (bufferline.nvim)
+| Key | Mode | Action |
+|---|---|---|
+| `<S-l>` / `<S-h>` | normal | Next / previous buffer (tabs in top bar) |
+| `<leader><tab>l` | normal | Cycle to last buffer |
+| `<leader><tab>p` | normal | Pin buffer |
+| `<leader><tab>d` | normal | Pick buffers to close |
+| `<leader><tab>f` | normal | Fuzzy-pick a buffer |
+
+### Git in the gutter (gitsigns.nvim)
+| Key | Mode | Action |
+|---|---|---|
+| `]h` / `[h` | normal | Next / previous hunk (`]H`/`[H` = last/first) |
+| `<leader>hs` | n/v | Stage hunk |
+| `<leader>hr` | n/v | Reset hunk |
+| `<leader>hS` / `<leader>hR` | normal | Stage / reset whole buffer |
+| `<leader>hu` | normal | Undo stage |
+| `<leader>hP` | normal | Preview hunk |
+| `<leader>hb` / `<leader>hB` | normal | Blame line / full blame panel |
+| `<leader>hd` / `<leader>hD` | normal | Diff this file / vs ~HEAD |
+| `ih` | o/x (textobject) | Select hunk |
+
+> ⚠️ `<leader>hp/hm/hn/h1..h4` remain harpoon — gitsigns avoids them on purpose (`hP` not `hp`).
+
+### Diagnostics & symbols (trouble.nvim)
+| Key | Mode | Action |
+|---|---|---|
+| `<leader>xx` | normal | Toggle diagnostics panel |
+| `<leader>xX` | normal | Buffer-only diagnostics panel |
+| `<leader>xL` / `<leader>xQ` | normal | Location list / quickfix panel |
+| `[x` / `]x` | normal | Prev / next trouble item |
+| `<leader>cs` | normal | Document symbols panel (LSP outline) |
+
+### Navigation (flash.nvim)
+| Key | Mode | Action |
+|---|---|---|
+| `s` | n/x/o | 2-char jump anywhere on screen |
+| `S` | n/x/o | Treesitter-aware structural select/jump |
+| `r` | operator | Remote flash (act on a distant target, e.g. `yr` to yank) |
+| `R` | o/x | Treesitter search |
+| `<c-s>` | cmdline | Toggle flash scaling inside /search |
+
+### UI (noice.nvim)
+- Floating, centered `:` command box; LSP progress as a small popup; messages/errors rendered in popups. Search stays at the bottom (`bottom_search`), toasts remain snacks notifications.
+- `<Tab>` inside the floating cmdline is not bound (your nvim-cmp does not add cmdline sources).
