@@ -12,8 +12,8 @@ return {
             { icon = " ", key = "<leader>sr", desc = "Recent Files", action = function() Snacks.dashboard.pick("recent") end },
             { icon = " ", key = "<leader>sg", desc = "Find Text", action = function() Snacks.dashboard.pick("grep") end },
             { icon = " ", key = "o", desc = "Open Obsidian Vault", action = function()
-              -- capture-ss vault / Home.md — mirrors the old <leader>tw map
-              local dir = "/Volumes/LOCUS/Partage/Projects/Carbon Management/Capture SS/99_Notes_Obsidian/Obsidian_Capture_SS"
+              -- personal vault / Home.md — default vault on this Mac
+              local dir = vim.fn.expand("~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Obsidian Tym")
               vim.cmd("cd " .. vim.fn.fnameescape(dir))
               vim.cmd("edit " .. vim.fn.fnameescape(dir .. "/Home.md"))
             end },
