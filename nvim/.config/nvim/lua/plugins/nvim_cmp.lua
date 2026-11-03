@@ -358,8 +358,11 @@ vim.api.nvim_create_autocmd("TextChangedI", {
       return
     end
     
-    -- Trigger completion for [[ (wiki links) or # (tags)
-    if before_cursor:match("%[%[$") or before_cursor:match("%[%[[^%]]+$") or before_cursor:match("#[%w_-]*$") then
+    -- Trigger completion for [[ (wiki links) or # (tags).
+    -- NOTE: # requires at least one word char after it — a bare "#" must not
+    -- call cmp.complete() (it would pop a stray menu with no tag source that
+    -- can complete an empty search).
+    if before_cursor:match("%[%[$") or before_cursor:match("%[%[[^%]]+$") or before_cursor:match("#[%w_][%w_-]*$") then
       cmp.complete()
     end
   end,
