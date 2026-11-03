@@ -152,6 +152,9 @@ return {
     --        placeholder of the current snippet.
     vim.keymap.set({"i", "s"}, "<C-k>", function()
       if ls.expand_or_locally_jumpable() then
+        -- Arm the quiet window: expansion inserts text and fires TextChangedI
+        -- inside the just-entered snippet -- don't auto-pop from that insert.
+        require("config.snippet_quiet").arm()
         ls.expand_or_jump()
       end
     end, { silent = true, desc = "LuaSnip: Expand or jump forward" })

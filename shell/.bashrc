@@ -23,9 +23,6 @@ eval "$(starship init bash)"
 eval "$(zoxide init bash)"
 eval "$(fzf --bash)"
 
-# Atuin
-. "$HOME/.atuin/bin/env"
-
 # Ghostty shell integration
 if [[ $TERM == "xterm-ghostty" ]]; then
   source "/Applications/Ghostty.app/Contents/Resources/ghostty/shell-integration/bash/ghostty.bash"

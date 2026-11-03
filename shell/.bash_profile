@@ -17,11 +17,6 @@ fi
 
 source ~/git-flow-completion.bash 2>/dev/null
 
-# ============================================
-# Atuin
-# ============================================
-. "$HOME/.atuin/bin/env"
-
 # bashrc handles the rest (prompt, fzf, editor)
 source ~/.bashrc
 . "$HOME/.cargo/env"

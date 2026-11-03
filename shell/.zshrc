@@ -37,7 +37,7 @@ eval "$(zoxide init zsh)"
 eval "$(fzf --zsh)"
 
 # Atuin: history replacement, binds Ctrl+R and Up
-. "$HOME/.atuin/bin/env"   # adds ~/.atuin/bin to PATH first
+# Homebrew-managed binary (/opt/homebrew/bin/atuin) — no self-managed copy in PATH.
 eval "$(atuin init zsh)"
 
 # ============================================
