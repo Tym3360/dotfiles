@@ -1,7 +1,6 @@
 -- snacks.nvim: collection of QoL modules (picker, explorer, terminal, etc.).
 -- Kept as a top-level spec because several modules need to be set up early.
--- Note: snacks.dashboard is configured in snacks-dashboard.lua and now owns
--- the startup screen (alpha-nvim was removed).
+-- Note: snacks.dashboard is disabled — alpha-nvim owns the startup screen.
 return {
   "folke/snacks.nvim",
   priority = 1000,
@@ -10,6 +9,7 @@ return {
   opts = {
     bigfile = { enabled = true },
     bufdelete = { enabled = true },
+    dashboard = { enabled = false },
     explorer = { enabled = true },
     git = { enabled = true },
     gitbrowse = {
