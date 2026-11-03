@@ -337,9 +337,16 @@ vim.api.nvim_create_autocmd("TextChangedI", {
     local col = vim.api.nvim_win_get_cursor(0)[2]
     local before_cursor = line:sub(1, col + 1)
     
-    -- Check if we're in the Obsidian vault
-    local filepath = vim.fn.expand("%:p")
-    if not filepath:match("Obsidian Tym") then
+    -- Check if this buffer is inside one of the obsidian vaults, resolved
+    -- from obsidian.nvim's own workspace config (obsidian.lua) instead of a
+    -- hard-coded path. (The old hard-coded "Obsidian Tym" match silently
+    -- killed [[ completion in the capture-ss vault.)
+    local ok_obs, obsidian = pcall(require, "obsidian")
+    if not (ok_obs and obsidian._client and obsidian._client.opts) then
+      return
+    end
+    local buf_dir = vim.fs.dirname(vim.fn.expand("%:p"))
+    if not require("obsidian.workspace").get_workspace_for_dir(buf_dir, obsidian._client.opts.workspaces) then
       return
     end
     
