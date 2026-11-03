@@ -43,9 +43,9 @@ return {
   },
   keys = {
     -- Search / pickers (telescope keeps <leader>f*)
-    { "<leader>sf", function() Snacks.picker.files() end, desc = "Find Files" },
-    { "<leader>sg", function() Snacks.picker.grep() end, desc = "Grep" },
-    { "<leader>sw", function() Snacks.picker.grep_word() end, mode = { "n", "x" }, desc = "Grep Word/Selection" },
+    { "<leader>sf", function() Snacks.picker.files({ cwd = require("config.picker_root").root() }) end, desc = "Find Files" },
+    { "<leader>sg", function() Snacks.picker.grep({ cwd = require("config.picker_root").root() }) end, desc = "Grep" },
+    { "<leader>sw", function() Snacks.picker.grep_word({ cwd = require("config.picker_root").root() }) end, mode = { "n", "x" }, desc = "Grep Word/Selection" },
     { "<leader>sb", function() Snacks.picker.buffers() end, desc = "Buffers" },
     { "<leader>sr", function() Snacks.picker.recent() end, desc = "Recent Files" },
     { "<leader>sl", function() Snacks.picker.lines() end, desc = "Buffer Lines" },

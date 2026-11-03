@@ -39,20 +39,14 @@ return {
     -- the workspace to the first workspace in the list whose `path` is a parent of the
     -- current markdown file being edited.
     workspaces = {
-      {
-        name = "personal",
-        path ="~/Library/Mobile Documents/iCloud~md~obsidian/Documents/Obsidian Tym"
-      },
-      {
-        name = "capture-ss",
-        path = "/Volumes/LOCUS/Partage/Projects/Carbon Management/Capture SS/99_Notes_Obsidian/Obsidian_Capture_SS",
-        -- Same folder layout as the other vaults.
+      require("config.vaults")[1],
+      vim.tbl_deep_extend("force", require("config.vaults")[2], {
         overrides = {
           attachments = {
             img_folder = "40 - Media",
           },
         },
-      },
+      }),
     },
 
     -- Alternatively - and for backwards compatibility - you can set 'dir' to a single path instead of
