@@ -17,6 +17,23 @@ do
   end
 end
 
+-- Guard against a dead working directory. If the cwd is deleted or its mount
+-- (e.g. the LOCUS SMB share) disappears mid-session, uv.cwd() returns nil and
+-- nvim >= 0.12 asserts in vim.fs.abspath on the first relative-path filetype
+-- probe (render-markdown code blocks crash with "vim/fs:837: assertion failed").
+-- Repair silently: a deleted cwd can still chdir away.
+do
+  local function safe_cwd()
+    if vim.uv.cwd() == nil then
+      pcall(function() vim.uv.chdir(vim.fn.expand("~")) end)
+    end
+  end
+  safe_cwd()
+  vim.api.nvim_create_autocmd("BufEnter", {
+    callback = safe_cwd,
+  })
+end
+
 -- Setup lazy.nvim
 require("config.lazy")
 
